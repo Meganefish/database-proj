@@ -4,6 +4,7 @@
     <h1> {{ forum_name }} >></h1>
     {% if g.user %}
         <a class="action" href="{{url_for('blog.create')}}">New</a>
+        <hr>
     {% endif %}
 {% endblock %}
 
@@ -20,6 +21,19 @@
                 {% endif %}
             </header>
             <p class="body">{{ post['body'] }}</p>
+            {% for comment in comments %}
+                {% if comment['post_id']==post['id'] %}
+                    <div class='comment'>
+                        {% if comment['parent_post_id'] %}
+                            <div class="about">referring comment#00{{ comment['parent_post_id'] }} by {{ comment["username"] }} on {{ comment['created'].strftime('%Y-%m-%d') }}</div>
+                        {% else %}
+                            <div class="about"> by {{ comment["username"] }} on {{ comment['created'].strftime('%Y-%m-%d') }}</div>
+                        {% endif %}
+                        <p>{{ comment['body'] }}</p>
+                    <hr>
+                    </div>
+                {% endif %}
+            {% endfor %}
         </article>
         {% if not loop.last %}
             <hr>

@@ -19,7 +19,14 @@ def index():
         'JOIN forums f ON p.forum_id = f.forum_id'
         ' ORDER BY created DESC, p.id DESC'
     ).fetchall()
-    return render_template('blog/index.html', posts=posts)
+    comments = db.execute(
+        ' SELECT * '
+        ' FROM comment c '
+        ' JOIN user u ON c.user_id = u.id '
+        ' JOIN post p ON c.post_id = p.id '
+        ' ORDER BY created ASC, c.comment_id ASC'
+    )
+    return render_template('blog/index.html', posts=posts, comments=comments)
 
 
 # 创建视图
@@ -116,5 +123,14 @@ def forum(forum_id):
         'SELECT forum_name FROM forums WHERE forum_id = ?',
         (forum_id,)
     ).fetchone()
+    comments = db.execute(
+        ' SELECT * '
+        ' FROM comment c '
+        ' JOIN user u ON c.user_id = u.id '
+        ' JOIN post p ON c.post_id = p.id '
+        ' WHERE p.forum_id = ?'
+        ' ORDER BY created ASC, c.comment_id ASC',
+        (forum_id,)
+    )
     forum_name = forum_name_row['forum_name'] if forum_name_row else "forum not found"
-    return render_template('blog/forum.html', posts=posts, forum_name=forum_name)
+    return render_template('blog/forum.html', posts=posts, forum_name=forum_name, comments=comments)
