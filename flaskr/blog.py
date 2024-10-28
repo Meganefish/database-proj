@@ -26,6 +26,7 @@ def index():
         ' JOIN post p ON c.post_id = p.id '
         ' ORDER BY created ASC, c.comment_id ASC'
     )
+    # TODO for frontend: 请完善前端代码
     return render_template('blog/index.html', posts=posts, comments=comments)
 
 
@@ -49,6 +50,7 @@ def create():
             )
             db.commit()
             return redirect(url_for('blog.index'))
+    # TODO for frontend: 请完善前端代码
     return render_template('blog/create.html', forums=forums)
 
 
@@ -93,7 +95,7 @@ def update(id):
             )
             db.commit()
             return redirect(url_for('blog.index'))
-
+    # TODO for frontend: 请完善前端代码
     return render_template('blog/update.html', post=post)
 
 
@@ -104,17 +106,40 @@ def delete(id):
     db = get_db()
     db.execute('DELETE FROM post WHERE id = ?', (id,))
     db.commit()
+    # TODO for frontend: 请完善前端代码
     return redirect(url_for('blog.index'))
+
+@bp.route('/p/<int:post_id>', methods=('GET', 'POST'))
+def post(post_id):
+    db = get_db()
+    post_spe = db.execute(
+        ' SELECT *'
+        ' FROM post p'
+        ' JOIN forums f ON p.forum_id = f.forum_id'
+        ' JOIN user u ON p.author_id = u.id'
+        ' WHERE p.id = ?',
+        (post_id,)
+    ).fetchone()
+    comments = db.execute(
+        ' SELECT * '
+        ' FROM post p '
+        ' JOIN comment c ON p.id = c.comment_id '
+        ' WHERE c.post_id = ? '
+        ' ORDER BY created DESC, c.comment_id DESC ',
+        (post_id,)
+    ).fetchall()
+    # TODO for frontend: 请完善前端代码
+    return render_template('blog/post.html', post=post_spe, comments=comments)
 
 
 @bp.route('/f/<int:forum_id>', methods=('GET', 'POST'))
 def forum(forum_id):
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, title, body,created, author_id, username, forum_name'
+        ' SELECT p.id, title, body,created, author_id, username, forum_name'
         ' FROM post p '
-        'JOIN user u ON p.author_id = u.id '
-        'JOIN forums f ON p.forum_id = f.forum_id'
+        ' JOIN user u ON p.author_id = u.id '
+        ' JOIN forums f ON p.forum_id = f.forum_id'
         ' WHERE f.forum_id = ?'
         ' ORDER BY created DESC, p.id DESC',
         (forum_id,)
@@ -133,4 +158,5 @@ def forum(forum_id):
         (forum_id,)
     )
     forum_name = forum_name_row['forum_name'] if forum_name_row else "forum not found"
+    # TODO for frontend: 请完善前端代码
     return render_template('blog/forum.html', posts=posts, forum_name=forum_name, comments=comments)

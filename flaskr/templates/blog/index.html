@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
+<!-- TODO: 请使用你的前端设计文件，调整该页面的整体布局 -->
 {% block header %}
-    <h1>{%block title%}Posts{%endblock%} </h1>
+    <!-- TODO: 请在 home 部分设置链接导航至 blog.index 的路由 -->
+    <h1>{%block title%}home >> Posts{%endblock%} </h1>
     {% if g.user %}
         <a class="action" href="{{url_for('blog.create')}}">New</a>
         <hr>
@@ -10,6 +12,7 @@
 
 {% block content %}
     {% for post in posts %}
+    <!-- TODO: 请对每一个post设置链接到 blog.post 的对应post.id的路由 -->
         <article class="post">
             <header>
                 <div>
@@ -21,6 +24,8 @@
                 {% endif %}
             </header>
             <p class="body">{{ post['body'] }}</p>
+            <!-- TODO: 这里代码有点问题，循环嵌套中仅在第一层的第一个post中遍历了comments内容，此后循环没有再次遍历comments内容，
+                        这个问题我一直找不出来在哪里，如果你有办法的话希望能够修改一下, QAQ -->
             {% for comment in comments %}
                 {% if comment['post_id']==post['id'] %}
                     <div class='comment'>
@@ -32,7 +37,6 @@
                     <hr>
                     </div>
                 {% endif %}
-                <p>test</p>
             {% endfor %}
         </article>
         {% if not loop.last %}

@@ -1,3 +1,7 @@
+/* TODO: 此css文档为网站项目的各个网页布局格式的初始设置，
+            你可以直接删除此css文件，改为你使用的css，或者在此基础上添加你的css代码或者文件
+            但一定要保证下面提及到的元素都能被渲染到 */
+
 html { font-family: sans-serif; background: #eee; padding: 1rem; }
 body { max-width: 960px; margin: 0 auto; background: white; }
 h1 { font-family: serif; color: #377ba8; margin: 1rem 0; }
