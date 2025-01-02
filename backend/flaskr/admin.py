@@ -200,8 +200,8 @@ def accept_apply(apply_id):
             'success': False,
             'message': '论坛数量超过上限'
         })
-    forum_name = request.form['forum_name']
-    description = request.form['description']
+    forum_name = request.get_json().get('forum_name')
+    description = request.get_json().get('description')
     db.execute('''
         INSERT INTO Forum (forum_name, description) VALUE (?,?)
     ''', (forum_name, description, ))

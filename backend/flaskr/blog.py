@@ -82,8 +82,8 @@ def apply_forum():
             'success': False,
             'message': '申请失败，论坛数量超过上限'
         })
-    forum_name = request.form['forum_name']
-    description = request.form['description']
+    forum_name = request.get_json().get('forum_name')
+    description = request.get_json().get('description')
     user_id = g.user['user_id']
     if not forum_name or not description:
         return jsonify({
@@ -108,8 +108,8 @@ def apply_forum():
 @login_checked
 def release_post(forum_id):
     db = get_db()
-    title = request.form['title']
-    body = request.form['body']
+    title = request.get_json().get('title')
+    body = request.get_json().get('body')
     user_id = g.user['user_id']
     if not title or not body:
         return jsonify({
@@ -172,7 +172,7 @@ def post(post_id):
 def release_comment(post_id):
     db = get_db()
     user_id = g.user['user_id']
-    body = request.form['body']
+    body = request.get_json().get('body')
     db.execute('''
         INSERT INTO Comment (body) VALUE ?
     ''', (body, ))
@@ -287,7 +287,7 @@ def click_like(comment_id):
 @bp.route('/submit_report_post<int:post_id>', methods=['GET'])
 @login_checked
 def submit_report_post(post_id):
-    reason = request.form['reason']
+    reason = request.get_json().get('reason')
     user_id = g.user['user_id']
     db = get_db()
     db.execute('''
@@ -312,7 +312,7 @@ def submit_report_post(post_id):
 @bp.route('/submit_report_comment<int:comment_id>', methods=['GET'])
 @login_checked
 def submit_report_comment(comment_id):
-    reason = request.form['reason']
+    reason = request.get_json().get('reason')
     user_id = g.user['user_id']
     db = get_db()
     db.execute('''
@@ -332,3 +332,6 @@ def submit_report_comment(comment_id):
         'success': True,
         'message': '提交评论举报成功'
     })
+
+
+

@@ -19,9 +19,9 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 # 填写初测内容的表单页面
 @bp.route('/register', methods=['POST'])
 def register():
-    username = request.form['username']
-    password = request.form['password']
-    nickname = request.form['nickname']
+    username = request.get_json().get('username')
+    password = request.get_json().get('password')
+    nickname = request.get_json().get('nickname')
     db = get_db()
     if not username or not password or not nickname:
         return jsonify({
@@ -49,8 +49,8 @@ def register():
 # 登录视图
 @bp.route('/login', methods=['POST'])
 def login():
-    username = request.form['username']
-    password = request.form['password']
+    username = request.get_json().get('username')
+    password = request.get_json().get('password')
     db = get_db()
     user = db.execute(
         'SELECT * FROM user WHERE username = ?', (username,)
@@ -76,8 +76,8 @@ def login():
 
 @bp.route('/admin_login', methods=['POST'])
 def admin_login():
-    username = request.form['username']
-    password = request.form['password']
+    username = request.get_json().get('username')
+    password = request.get_json().get('password')
     db = get_db()
     user = db.execute(
         'SELECT * FROM user WHERE username = ? AND category = "admin"', (username,)
@@ -148,8 +148,8 @@ def reset_password():
         })
     db = get_db()
     user_id = g.user['user_id']
-    old_password = request.form['old_password']
-    new_password = request.form['new_password']
+    old_password = request.get_json().get('old_password')
+    new_password = request.get_json().get('new_password')
     if not old_password or not new_password:
         return jsonify({
             'success': False,
@@ -179,7 +179,7 @@ def set_nickname():
         })
     db = get_db()
     user_id = g.user['user_id']
-    new_nickname = request.form['nickname']
+    new_nickname = request.get_json().get('nickname')
     db.execute('''
         UPDATE user SET nickname = ? WHERE user_id = ?
     ''', (new_nickname, user_id))
@@ -198,7 +198,7 @@ def set_grade():
         })
     db = get_db()
     user_id = g.user['user_id']
-    grade = request.form['grade']
+    grade = request.get_json().get('grade')
     db.execute('''
         UPDATE user SET grade = ? WHERE user_id = ?
     ''', (grade, user_id))
@@ -217,7 +217,7 @@ def set_major():
         })
     db = get_db()
     user_id = g.user['user_id']
-    major = request.form['major']
+    major = request.get_json().get('major')
     db.execute('''
         UPDATE user SET major = ? WHERE user_id = ?
     ''', (major, user_id))
