@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS release_post;
 DROP TABLE IF EXISTS browse;
 DROP TABLE IF EXISTS release_comment;
 DROP TABLE IF EXISTS like_comment;
+DROP TABLE IF EXISTS like_post;
 DROP TABLE IF EXISTS release_report;
 DROP TABLE IF EXISTS com_post;
 DROP TABLE IF EXISTS parent;
@@ -107,7 +108,7 @@ CREATE TABLE release_comment (
     comment_id INTEGER,
     user_id INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES Comment(comment_id),
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     PRIMARY KEY (comment_id, user_id)
 );
@@ -115,9 +116,17 @@ CREATE TABLE like_comment (
     comment_id INTEGER,
     user_id INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES Comment(comment_id),
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     PRIMARY KEY (comment_id, user_id)
+);
+CREATE TABLE like_post (
+    post_id INTEGER,
+    user_id INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES Post(post_id),
+    FOREIGN KEY (user_id) REFERENCES User(user_id),
+    PRIMARY KEY (post_id, user_id)
 );
 CREATE TABLE release_report (
     report_id INTEGER,
@@ -131,15 +140,15 @@ CREATE TABLE release_report (
 CREATE TABLE com_post (
     comment_id INTEGER,
     post_id INTEGER,
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES comment(comment_id),
     FOREIGN KEY (post_id) REFERENCES Posts(post_id),
     PRIMARY KEY (comment_id, post_id)
 );
 CREATE TABLE parent (
     parent_comment_id INTEGER,
     comment_id INTEGER ,
-    FOREIGN KEY (parent_comment_id) REFERENCES Comments(comment_id),
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (parent_comment_id) REFERENCES comment(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES comment(comment_id),
     PRIMARY KEY (parent_comment_id, comment_id)
 );
 CREATE TABLE report_post (
@@ -153,7 +162,7 @@ CREATE TABLE report_comment (
     report_id INTEGER,
     comment_id INTEGER ,
     FOREIGN KEY (report_id) REFERENCES Reports(report_id),
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES comment(comment_id),
     PRIMARY KEY (report_id, comment_id)
 );
 CREATE TABLE post_forum (

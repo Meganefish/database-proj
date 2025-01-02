@@ -33,14 +33,14 @@ def page(page_id):
     offset = (page_id - 1) * posts_per_page
     db = get_db()
     posts_query = """
-            SELECT p.post_id, p.title, p.body, rp.updated
+            SELECT *
             FROM release_post rp
             JOIN post p ON rp.post_id = p.post_id
+            JOIN user u ON u.user_id = rp.user_id
             ORDER BY rp.updated DESC
             LIMIT ? OFFSET ?
         """
     posts = db.execute(posts_query, [posts_per_page, offset]).fetchall()
-    # return render_template('blog/index.html', posts=posts, page_id=page_id)
     posts_list = [dict(post) for post in posts]
     return jsonify(posts_list)
 
@@ -56,10 +56,11 @@ def forumPage(forum_id, page_id):
     offset = (page_id - 1) * posts_per_page
     db = get_db()
     posts_query = """
-            SELECT p.post_id, p.title, p.body, rp.updated
+            SELECT *
             FROM post_forum pf
             JOIN post p ON pf.post_id = p.post_id
             JOIN release_post rp ON pf.post_id = rp.post_id
+            JOIN User u ON u.user_id = rp.user_id
             WHERE pf.forum_id = ?
             ORDER BY rp.updated DESC
             LIMIT ? OFFSET ?
@@ -277,6 +278,34 @@ def click_like(comment_id):
         db.execute('''
                 DELETE FROM like_comment WHERE user_id = ? AND comment_id = ?
             ''', (user_id, comment_id))
+        db.commit()
+        return jsonify({
+            'success': True,
+            'message': '取消点赞成功'
+        })
+
+
+@bp.route('/post<int:post_id>/click_like', methods=['POST'])
+@login_checked
+def click_like_post(post_id):
+    db = get_db()
+    user_id = g.user['user_id']
+    cur_like_post = db.execute('''
+            SELECT 1 FROM like_post WHERE user_id = ? AND post_id = ?
+        ''', (user_id, post_id)).fetchone()
+    if not cur_like_post:
+        db.execute('''
+                    INSERT INTO like_post (user_id, post_id) VALUE (?,?)
+                ''', (user_id, post_id))
+        db.commit()
+        return jsonify({
+            'success': True,
+            'message': '点赞成功'
+        })
+    else:
+        db.execute('''
+                DELETE FROM like_post WHERE user_id = ? AND post_id = ?
+            ''', (user_id, post_id))
         db.commit()
         return jsonify({
             'success': True,

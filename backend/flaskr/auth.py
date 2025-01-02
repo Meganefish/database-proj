@@ -37,12 +37,12 @@ def register():
     except db.IntegrityError:
         return jsonify({
             'success': False,
-            'massage': '注册失败，该用户名已经注册过'
+            'message': '注册失败，该用户名已经注册过'
         })
 
     return jsonify({
         'success': True,
-        'massage': '注册成功'
+        'message': '注册成功'
     })
 
 
