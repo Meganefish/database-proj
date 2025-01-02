@@ -12,7 +12,7 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:1925", "supports_credentials": True}})
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
     else:

@@ -108,7 +108,7 @@ export default {
             // loading.value = true;
             console.log(1);
             console.log("798879");
-            console.log(res.data.sucess);
+            console.log(res.data.success);
             console.log(res.data.message);
             if (res.data.sucess == true) {
               ElMessage.success("登录成功");

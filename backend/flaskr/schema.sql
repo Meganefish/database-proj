@@ -172,28 +172,28 @@ CREATE TABLE manage_forum (
 );
 
 INSERT INTO User (username, password, nickname, grade, major, category) VALUES
-('admin', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', 'admin', 0, 'Not applicable', 'admin');
+('admin', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', 'admin', 0, 'Not applicable', 'admin');
 
 INSERT INTO User (username, password, nickname, grade, major) VALUES
-('zhangsan', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '张三', 2021, '计算机科学与技术'),
-('lisi', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '李四', 2022, '电子信息工程'),
-('wangwu', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '王五', 2023, '机械工程'),
-('zhaoliu', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '赵六', 2024, '土木工程'),
-('chenqi', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '陈七', 2021, '生物工程'),
-('liubing', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '刘兵', 2023, '物理学'),
-('wushuo', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '吴硕', 2022, '化学'),
-('yangyi', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '杨易', 2023, '数学与应用数学'),
-('sunwei', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '孙伟', 2024, '法学'),
-('houjie', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '侯杰', 2021, '医学'),
-('guangming', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '光明', 2022, '金融学'),
-('maofeng', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '毛峰', 2023, '会计学'),
-('tianlong', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '田龙', 2024, '市场营销'),
-('huangqiang', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '黄强', 2021, '人力资源管理'),
-('caohao', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '曹浩', 2022, '广告学'),
-('lianqi', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '连琪', 2023, '艺术设计'),
-('xiaoqiang', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '小强', 2024, '环境科学'),
-('chenghui', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '程辉', 2021, '电子商务'),
-('liuwei', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '刘伟', 2022, '软件工程');
+('zhangsan', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '张三', 2021, '计算机科学与技术'),
+('lisi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '李四', 2022, '电子信息工程'),
+('wangwu', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '王五', 2023, '机械工程'),
+('zhaoliu', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '赵六', 2024, '土木工程'),
+('chenqi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '陈七', 2021, '生物工程'),
+('liubing', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '刘兵', 2023, '物理学'),
+('wushuo', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '吴硕', 2022, '化学'),
+('yangyi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '杨易', 2023, '数学与应用数学'),
+('sunwei', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '孙伟', 2024, '法学'),
+('houjie', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '侯杰', 2021, '医学'),
+('guangming', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '光明', 2022, '金融学'),
+('maofeng', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '毛峰', 2023, '会计学'),
+('tianlong', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '田龙', 2024, '市场营销'),
+('huangqiang', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '黄强', 2021, '人力资源管理'),
+('caohao', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '曹浩', 2022, '广告学'),
+('lianqi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '连琪', 2023, '艺术设计'),
+('xiaoqiang', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '小强', 2024, '环境科学'),
+('chenghui', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '程辉', 2021, '电子商务'),
+('liuwei', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '刘伟', 2022, '软件工程');
 
 
 
