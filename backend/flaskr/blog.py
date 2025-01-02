@@ -33,9 +33,10 @@ def page(page_id):
     offset = (page_id - 1) * posts_per_page
     db = get_db()
     posts_query = """
-            SELECT p.post_id, p.title, p.body, rp.updated
+            SELECT p.*,u.nickname
             FROM release_post rp
             JOIN post p ON rp.post_id = p.post_id
+            JOIN user u ON u.user_id = rp.user_id
             ORDER BY rp.updated DESC
             LIMIT ? OFFSET ?
         """

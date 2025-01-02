@@ -37,12 +37,12 @@ def register():
     except db.IntegrityError:
         return jsonify({
             'success': True,
-            'massage': '注册失败，该用户名已经注册过'
+            'message': '注册失败，该用户名已经注册过'
         })
 
     return jsonify({
         'success': True,
-        'massage': '注册成功'
+        'message': '注册成功'
     })
 
 
@@ -67,7 +67,7 @@ def login():
         })
     # 验证成功后，用户id存储在以新会话（session:用于存储横跨请求的值的dict）中;session数据会存储到一个向浏览器发送的cookie中。
     session.clear()
-    session['user_id'] = user['id']
+    session['user_id'] = user['user_id']
     return jsonify({
         'success': True,
         'message': '登录成功'
@@ -110,7 +110,7 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = get_db().execute(
-            'SELECT * FROM user WHERE id = ?', (user_id,)
+            'SELECT * FROM user WHERE user_id = ?', (user_id,)
         ).fetchone()
     # 如没有user_id或id不存在，则g.user为None
 

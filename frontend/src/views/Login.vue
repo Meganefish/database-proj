@@ -1,7 +1,10 @@
 <template>
   <div class="login-container">
     <el-card class="login-card" shadow="hover">
-      <h2 class="login-title">登录</h2>
+      <el-container class="login-title">
+      <img src="../assets/img/mingdao.png" class="logo">
+      <h1>高校论坛平台</h1>
+      </el-container>
       <el-form :model="form" :rules="rules"  label-width="100px">
         <!-- 登录身份选择 -->
         <el-form-item label="登录类型">
@@ -15,7 +18,7 @@
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" placeholder="请输入用户名">
             <template #prefix>
-              <el-icon><user /></el-icon>
+              <!-- <el-icon><user /></el-icon> -->
             </template>
           </el-input>
         </el-form-item>
@@ -28,13 +31,13 @@
             show-password
           >
             <template #prefix>
-              <el-icon><lock /></el-icon>
+              <!-- <el-icon><lock /></el-icon> -->
             </template>
           </el-input>
         </el-form-item>
 
-        <!-- 验证码
-        <el-form-item label="验证码" prop="captcha">
+        <!-- 验证码 -->
+        <!-- <el-form-item label="验证码" prop="captcha">
           <el-row>
             <el-col :span="14">
               <el-input v-model="form.captcha" placeholder="请输入验证码" />
@@ -50,16 +53,30 @@
           </el-row>
         </el-form-item> -->
 
-        <!-- 登录按钮 -->
+        <!-- 登录和注册按钮 -->
         <el-form-item>
-          <el-button
-            type="primary"
-            @click="handleLogin"
-            plain
-            block
-          >
-            登录
-          </el-button>
+          <el-row :gutter="50">
+            <el-col :span="12">
+              <el-button
+                type="default"
+                @click="handleLogin"
+                plain
+                block
+              >
+                登录
+              </el-button>
+            </el-col>
+            <el-col :span="12">
+              <el-button
+                type="default"
+                @click="handleRegister"
+                plain
+                block
+              >
+                注册
+              </el-button>
+            </el-col>
+          </el-row>
         </el-form-item>
       </el-form>
     </el-card>
@@ -99,20 +116,14 @@ export default {
     // };
 
     const handleLogin = () => {   // 表单验证
-      console.log(5);
-      console.log("123456");
       // const loginForm = ref("loginForm");
-      try{axios.post("/auth/login", form,{
-                    withCredentials: true  // 确保每个请求都带上 cookie
-                }).then((res) => {
-            // loading.value = true;
-            console.log(1);
-            console.log("798879");
-            console.log(res.data.sucess);
+      try{
+        if (form.userType=="admin"){
+          axios.post("/auth/admin_login", form).then((res) => {
             console.log(res.data.message);
             if (res.data.sucess == true) {
               ElMessage.success("登录成功");
-              const homeUrl = window.location.href.replace(/\/login$/, "/home");
+              const homeUrl = window.location.href.replace(/\/admin_login$/, "/admin_home");
               setTimeout(() => {
                 window.location.href = homeUrl; 
               }, 1000); // 等待 1 秒
@@ -121,10 +132,35 @@ export default {
               // refreshCaptcha();
             }
           })
+        }
+        else{
+          axios.post("/auth/login", form).then((res) => {
+            // loading.value = true;
+            console.log(res.data.message);
+            if (res.data.success == true) {
+              ElMessage.success({message:"登录成功",duration:1200,
+                    onClose:()=>{
+                        const Url = window.location.href.replace(/\/login$/, "/home");
+                        window.location.href = Url; 
+                        }});
+            } else {
+              ElMessage.error(res.data.message || "登录失败");
+              // refreshCaptcha();
+            }
+          })
+        }        
       }catch(error){
             // loading.value = false;
             ElMessage.error(error.message || "请求出错");
             // refreshCaptcha();
+      }
+    };
+    const handleRegister = () =>{
+      try{
+        const Url = window.location.href.replace(/\/login$/, "/register");
+        window.location.href = Url;
+      }catch(error){
+            ElMessage.error(error.message || "请求出错");
       }
     };
 
@@ -135,6 +171,7 @@ export default {
       // captchaSrc,
       // refreshCaptcha,
       handleLogin,
+      handleRegister,
     };
   },
 };
@@ -146,17 +183,35 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f5f5f5;
+  background: url('../assets/img/background.jpg');
+  background-size: cover;
 }
 .login-card {
   width: 400px;
 }
-.login-title {
-  text-align: center;
-  margin-bottom: 20px;
+.login-title{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-grow: 0;
 }
-.captcha-img-container {
+
+.login-title h1{
+  font-size: 22px;
+  line-height: 22px;
+  margin: 0;
+  margin-left: 5px;
+  font-weight: 500;
+}
+/* .captcha-img-container {
   text-align: center;
   cursor: pointer;
+} */
+.logo{
+  width: 50px;
+  height: 50px;
 }
 </style>
