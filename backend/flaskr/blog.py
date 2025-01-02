@@ -41,7 +41,6 @@ def page(page_id):
             LIMIT ? OFFSET ?
         """
     posts = db.execute(posts_query, [posts_per_page, offset]).fetchall()
-    # return render_template('blog/index.html', posts=posts, page_id=page_id)
     posts_list = [dict(post) for post in posts]
     return jsonify(posts_list)
 
@@ -57,10 +56,11 @@ def forumPage(forum_id, page_id):
     offset = (page_id - 1) * posts_per_page
     db = get_db()
     posts_query = """
-            SELECT p.post_id, p.title, p.body, rp.updated
+            SELECT *
             FROM post_forum pf
             JOIN post p ON pf.post_id = p.post_id
             JOIN release_post rp ON pf.post_id = rp.post_id
+            JOIN User u ON u.user_id = rp.user_id
             WHERE pf.forum_id = ?
             ORDER BY rp.updated DESC
             LIMIT ? OFFSET ?
@@ -285,6 +285,34 @@ def click_like(comment_id):
         })
 
 
+@bp.route('/post<int:post_id>/click_like', methods=['POST'])
+@login_checked
+def click_like_post(post_id):
+    db = get_db()
+    user_id = g.user['user_id']
+    cur_like_post = db.execute('''
+            SELECT 1 FROM like_post WHERE user_id = ? AND post_id = ?
+        ''', (user_id, post_id)).fetchone()
+    if not cur_like_post:
+        db.execute('''
+                    INSERT INTO like_post (user_id, post_id) VALUE (?,?)
+                ''', (user_id, post_id))
+        db.commit()
+        return jsonify({
+            'success': True,
+            'message': '点赞成功'
+        })
+    else:
+        db.execute('''
+                DELETE FROM like_post WHERE user_id = ? AND post_id = ?
+            ''', (user_id, post_id))
+        db.commit()
+        return jsonify({
+            'success': True,
+            'message': '取消点赞成功'
+        })
+
+
 @bp.route('/submit_report_post<int:post_id>', methods=['GET'])
 @login_checked
 def submit_report_post(post_id):
@@ -335,4 +363,69 @@ def submit_report_comment(comment_id):
     })
 
 
+@bp.route('/search_posts', methods=['GET'])
+def search_posts():
+    db = get_db()
+    posts = []
+    keyword = request.args.get('keyword', '')
+    if not keyword:
+        return jsonify({
+            "success": False,
+            "message": "查询失败，关键词为空",
+            "post": posts
+        }), 400
+    try:
+        query = """
+        SELECT post_id, title, body 
+        FROM Post 
+        WHERE title LIKE ?
+        """
+        result = db.execute(query, ('%' + keyword + '%',)).fetchall()
+        posts = [dict(post) for post in result]
+        return jsonify({
+            "success": True,
+            "message": "查询成功",
+            "posts": posts
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "查询失败",
+            "posts": posts
+        }), 500
 
+
+@bp.route('/forum<int:forum_id>/search_posts', methods=['GET'])
+def f_search_posts(forum_id):
+    db = get_db()
+    posts = []
+    keyword = request.args.get('keyword', '')
+    if not keyword:
+        return jsonify({
+            "success": False,
+            "message": "查询失败，关键词为空",
+            "posts": posts
+        }), 400
+    try:
+        query = """
+        SELECT p.post_id, p.title, p.body 
+        FROM Post p 
+        JOIN post_forum pf ON pf.post_id = p.post_id
+        JOIN forum f ON f.forum_id = pf.forum_id 
+        WHERE title LIKE ?
+        AND f.forum_id = ?
+        """
+        result = db.execute(query, ('%' + keyword + '%', forum_id)).fetchall()
+        posts = [dict(post) for post in result]
+
+        return jsonify({
+            "success": True,
+            "message": "查询成功",
+            "posts": posts
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "查询失败",
+            "posts": posts
+        }), 500

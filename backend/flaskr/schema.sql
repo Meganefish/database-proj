@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS release_post;
 DROP TABLE IF EXISTS browse;
 DROP TABLE IF EXISTS release_comment;
 DROP TABLE IF EXISTS like_comment;
+DROP TABLE IF EXISTS like_post;
 DROP TABLE IF EXISTS release_report;
 DROP TABLE IF EXISTS com_post;
 DROP TABLE IF EXISTS parent;
@@ -107,7 +108,7 @@ CREATE TABLE release_comment (
     comment_id INTEGER,
     user_id INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES Comment(comment_id),
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     PRIMARY KEY (comment_id, user_id)
 );
@@ -115,9 +116,17 @@ CREATE TABLE like_comment (
     comment_id INTEGER,
     user_id INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES Comment(comment_id),
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     PRIMARY KEY (comment_id, user_id)
+);
+CREATE TABLE like_post (
+    post_id INTEGER,
+    user_id INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES Post(post_id),
+    FOREIGN KEY (user_id) REFERENCES User(user_id),
+    PRIMARY KEY (post_id, user_id)
 );
 CREATE TABLE release_report (
     report_id INTEGER,
@@ -131,15 +140,15 @@ CREATE TABLE release_report (
 CREATE TABLE com_post (
     comment_id INTEGER,
     post_id INTEGER,
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES comment(comment_id),
     FOREIGN KEY (post_id) REFERENCES Posts(post_id),
     PRIMARY KEY (comment_id, post_id)
 );
 CREATE TABLE parent (
     parent_comment_id INTEGER,
     comment_id INTEGER ,
-    FOREIGN KEY (parent_comment_id) REFERENCES Comments(comment_id),
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (parent_comment_id) REFERENCES comment(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES comment(comment_id),
     PRIMARY KEY (parent_comment_id, comment_id)
 );
 CREATE TABLE report_post (
@@ -153,7 +162,7 @@ CREATE TABLE report_comment (
     report_id INTEGER,
     comment_id INTEGER ,
     FOREIGN KEY (report_id) REFERENCES Reports(report_id),
-    FOREIGN KEY (comment_id) REFERENCES Comments(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES comment(comment_id),
     PRIMARY KEY (report_id, comment_id)
 );
 CREATE TABLE post_forum (
@@ -172,28 +181,28 @@ CREATE TABLE manage_forum (
 );
 
 INSERT INTO User (username, password, nickname, grade, major, category) VALUES
-('admin', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', 'admin', 0, 'Not applicable', 'admin');
+('admin', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', 'admin', 0, 'Not applicable', 'admin');
 
 INSERT INTO User (username, password, nickname, grade, major) VALUES
-('zhangsan', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '张三', 2021, '计算机科学与技术'),
-('lisi', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '李四', 2022, '电子信息工程'),
-('wangwu', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '王五', 2023, '机械工程'),
-('zhaoliu', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '赵六', 2024, '土木工程'),
-('chenqi', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '陈七', 2021, '生物工程'),
-('liubing', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '刘兵', 2023, '物理学'),
-('wushuo', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '吴硕', 2022, '化学'),
-('yangyi', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '杨易', 2023, '数学与应用数学'),
-('sunwei', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '孙伟', 2024, '法学'),
-('houjie', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '侯杰', 2021, '医学'),
-('guangming', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '光明', 2022, '金融学'),
-('maofeng', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '毛峰', 2023, '会计学'),
-('tianlong', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '田龙', 2024, '市场营销'),
-('huangqiang', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '黄强', 2021, '人力资源管理'),
-('caohao', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '曹浩', 2022, '广告学'),
-('lianqi', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '连琪', 2023, '艺术设计'),
-('xiaoqiang', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '小强', 2024, '环境科学'),
-('chenghui', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '程辉', 2021, '电子商务'),
-('liuwei', 'a665a4cf3e9bb70fc8d6f5fc8c6bb9d4b9ed429ab017b39d36086be19379b4a4', '刘伟', 2022, '软件工程');
+('123', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '张三', 2021, '计算机科学与技术'),
+('lisi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '李四', 2022, '电子信息工程'),
+('wangwu', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '王五', 2023, '机械工程'),
+('zhaoliu', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '赵六', 2024, '土木工程'),
+('chenqi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '陈七', 2021, '生物工程'),
+('liubing', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '刘兵', 2023, '物理学'),
+('wushuo', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '吴硕', 2022, '化学'),
+('yangyi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '杨易', 2023, '数学与应用数学'),
+('sunwei', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '孙伟', 2024, '法学'),
+('houjie', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '侯杰', 2021, '医学'),
+('guangming', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '光明', 2022, '金融学'),
+('maofeng', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '毛峰', 2023, '会计学'),
+('tianlong', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '田龙', 2024, '市场营销'),
+('huangqiang', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '黄强', 2021, '人力资源管理'),
+('caohao', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '曹浩', 2022, '广告学'),
+('lianqi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '连琪', 2023, '艺术设计'),
+('xiaoqiang', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '小强', 2024, '环境科学'),
+('chenghui', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '程辉', 2021, '电子商务'),
+('liuwei', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '刘伟', 2022, '软件工程');
 
 
 
@@ -316,14 +325,14 @@ INSERT INTO Forum (forum_name, description) VALUES
 ('学习交流区', '为大家提供一个学习分享的平台'),
 ('校园活动', '展示校园内外活动信息的平台'),
 ('心情随笔', '分享个人心情和生活点滴'),
-('就业指导', '为同学们提供就业信息和指导'),
-('社团活动', '分享各类社团活动和消息'),
-('生活攻略', '分享校园生活中的各类小贴士'),
-('体育竞技', '体育爱好者的交流平台');
+('就业指导', '为同学们提供就业信息和指导');
 
 INSERT INTO Apply(name, description) VALUES
 ('文化艺术', '文化与艺术爱好者的讨论区'),
-('游戏区', '提供游戏相关的讨论和分享');
+('游戏区', '提供游戏相关的讨论和分享'),
+('社团活动', '分享各类社团活动和消息'),
+('生活攻略', '分享校园生活中的各类小贴士'),
+('体育竞技', '体育爱好者的交流平台');
 
 INSERT INTO user_apply(user_id, apply_id) VALUES
 (1, 1), (3,2);

@@ -36,7 +36,7 @@ def register():
         db.commit()
     except db.IntegrityError:
         return jsonify({
-            'success': True,
+            'success': False,
             'message': '注册失败，该用户名已经注册过'
         })
 
@@ -53,7 +53,7 @@ def login():
     password = request.get_json().get('password')
     db = get_db()
     user = db.execute(
-        'SELECT * FROM user WHERE username = ?', (username,)
+        'SELECT * FROM user WHERE username = ? AND category != "admin"', (username,)
     ).fetchone()
     if user is None:
         return jsonify({
@@ -61,6 +61,9 @@ def login():
             'message': '登录失败，不存在的用户名'
         })
     elif not check_password_hash(user['password'], password):  # 匹配密码
+        print(generate_password_hash(password))
+        print('user[password]: ', user['password'])
+        print('password: ', password)
         return jsonify({
             'success': False,
             'message': '登录失败，密码错误'
@@ -117,10 +120,13 @@ def load_logged_in_user():
 
 # 注销
 # 将某已登录的用户id从session中移除
-@bp.route('/logout')
+@bp.route('/logout', methods=['POST'])
 def logout():
     session.clear()
-    return redirect(url_for('index'))
+    return jsonify({
+        'suceess': True,
+        'message': '登出成功'
+    })
 
 
 @bp.route('/profile', methods=['GET'])
@@ -175,18 +181,44 @@ def set_nickname():
     if not g.user:
         return jsonify({
             'success': False,
-            'message': '设置密码失败，请先登录'
+            'message': '修改密码失败，请先登录'
         })
     db = get_db()
     user_id = g.user['user_id']
     new_nickname = request.get_json().get('nickname')
     db.execute('''
-        UPDATE user SET nickname = ? WHERE user_id = ?
-    ''', (new_nickname, user_id))
+            UPDATE user SET nickname = ? WHERE user_id = ?
+        ''', (new_nickname, user_id))
     return jsonify({
         'success': True,
         'message': '修改昵称成功'
     })
+
+
+@bp.route('/set_username', methods=['POST'])
+def set_username():
+    if not g.user:
+        return jsonify({
+            'success': False,
+            'message': '设置用户名失败，请先登录'
+        })
+    db = get_db()
+    user_id = g.user['user_id']
+    new_username = request.get_json().get('username')
+    try:
+        db.execute('''
+                UPDATE user SET nickname = ? WHERE user_id = ?
+            ''', (new_username, user_id))
+    except db.IntegrityError:
+        return jsonify({
+            'success': True,
+            'message': '修改用户名失败，重复的用户名'
+        })
+    return jsonify({
+        'success': True,
+        'message': '修改用户名成功'
+    })
+
 
 
 @bp.route('/set_grade', methods=['POST'])
@@ -227,8 +259,8 @@ def set_major():
     })
 
 
-CAPTCHA_FOLDER = Path("captcha")
-
+# CAPTCHA_FOLDER = Path("captcha")
+CAPTCHA_FOLDER = os.path.join(os.getcwd(), 'backend/flaskr/captcha')
 
 @bp.route('/get_captcha', methods=['GET'])
 def get_captcha():
