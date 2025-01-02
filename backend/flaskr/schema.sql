@@ -175,7 +175,7 @@ INSERT INTO User (username, password, nickname, grade, major, category) VALUES
 ('admin', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', 'admin', 0, 'Not applicable', 'admin');
 
 INSERT INTO User (username, password, nickname, grade, major) VALUES
-('zhangsan', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '张三', 2021, '计算机科学与技术'),
+('123', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '张三', 2021, '计算机科学与技术'),
 ('lisi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '李四', 2022, '电子信息工程'),
 ('wangwu', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '王五', 2023, '机械工程'),
 ('zhaoliu', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '赵六', 2024, '土木工程'),

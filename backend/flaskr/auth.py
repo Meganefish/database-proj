@@ -181,18 +181,44 @@ def set_nickname():
     if not g.user:
         return jsonify({
             'success': False,
-            'message': '设置密码失败，请先登录'
+            'message': '修改密码失败，请先登录'
         })
     db = get_db()
     user_id = g.user['user_id']
     new_nickname = request.get_json().get('nickname')
     db.execute('''
-        UPDATE user SET nickname = ? WHERE user_id = ?
-    ''', (new_nickname, user_id))
+            UPDATE user SET nickname = ? WHERE user_id = ?
+        ''', (new_nickname, user_id))
     return jsonify({
         'success': True,
         'message': '修改昵称成功'
     })
+
+
+@bp.route('/set_username', methods=['POST'])
+def set_username():
+    if not g.user:
+        return jsonify({
+            'success': False,
+            'message': '设置用户名失败，请先登录'
+        })
+    db = get_db()
+    user_id = g.user['user_id']
+    new_username = request.get_json().get('username')
+    try:
+        db.execute('''
+                UPDATE user SET nickname = ? WHERE user_id = ?
+            ''', (new_username, user_id))
+    except db.IntegrityError:
+        return jsonify({
+            'success': True,
+            'message': '修改用户名失败，重复的用户名'
+        })
+    return jsonify({
+        'success': True,
+        'message': '修改用户名成功'
+    })
+
 
 
 @bp.route('/set_grade', methods=['POST'])
@@ -233,8 +259,8 @@ def set_major():
     })
 
 
-CAPTCHA_FOLDER = Path("captcha")
-
+# CAPTCHA_FOLDER = Path("captcha")
+CAPTCHA_FOLDER = os.path.join(os.getcwd(), 'backend/flaskr/captcha')
 
 @bp.route('/get_captcha', methods=['GET'])
 def get_captcha():

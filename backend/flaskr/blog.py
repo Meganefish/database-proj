@@ -334,4 +334,69 @@ def submit_report_comment(comment_id):
     })
 
 
+@bp.route('/search_posts', methods=['GET'])
+def search_posts():
+    db = get_db()
+    posts = []
+    keyword = request.args.get('keyword', '')
+    if not keyword:
+        return jsonify({
+            "success": False,
+            "message": "查询失败，关键词为空",
+            "post": posts
+        }), 400
+    try:
+        query = """
+        SELECT post_id, title, body 
+        FROM Post 
+        WHERE title LIKE ?
+        """
+        result = db.execute(query, ('%' + keyword + '%',)).fetchall()
+        posts = [dict(post) for post in result]
+        return jsonify({
+            "success": True,
+            "message": "查询成功",
+            "posts": posts
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "查询失败",
+            "posts": posts
+        }), 500
 
+
+@bp.route('/forum<int:forum_id>/search_posts', methods=['GET'])
+def f_search_posts(forum_id):
+    db = get_db()
+    posts = []
+    keyword = request.args.get('keyword', '')
+    if not keyword:
+        return jsonify({
+            "success": False,
+            "message": "查询失败，关键词为空",
+            "posts": posts
+        }), 400
+    try:
+        query = """
+        SELECT p.post_id, p.title, p.body 
+        FROM Post p 
+        JOIN post_forum pf ON pf.post_id = p.post_id
+        JOIN forum f ON f.forum_id = pf.forum_id 
+        WHERE title LIKE ?
+        AND f.forum_id = ?
+        """
+        result = db.execute(query, ('%' + keyword + '%', forum_id)).fetchall()
+        posts = [dict(post) for post in result]
+
+        return jsonify({
+            "success": True,
+            "message": "查询成功",
+            "posts": posts
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "查询失败",
+            "posts": posts
+        }), 500
