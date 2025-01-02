@@ -23,6 +23,30 @@ const router = createRouter({
       // component是指组件  import引用login.vue地址
       component: ()=>import('../views/Login.vue')
     },
+    // {
+    //   path: '/admin_home',  // 路径
+    //   name: 'admin_home',  //名字
+    //   meta: {         
+    //     title: '管理主页' 
+    //   },
+    //   component: ()=>import('../views/Admin.vue')
+    // },
+    {
+      path: '/home',  // 路径
+      name: 'home',  //名字
+      meta: {         
+        title: '主页' 
+      },
+      component: ()=>import('../views/Home.vue')
+    },
+    {
+      path: '/register',  // 路径
+      name: 'register',  //名字
+      meta: {         
+        title: '注册页' 
+      },
+      component: ()=>import('../views/Register.vue')
+    },
   ]
 })
 
