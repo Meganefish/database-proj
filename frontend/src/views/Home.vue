@@ -53,7 +53,7 @@
                   {{ post.title.length > 10 ? post.title.slice(0, 10) + '...' : post.title }}
                 </h3>
                 <p>
-                  作者：{{ post.nickname.length > 10 ? post.nickname.slice(0, 10) + '...' : post.author }}
+                  作者：{{ post.nickname.length > 10 ? post.nickname.slice(0, 10) + '...' : post.nickname }}
                 </p>
                 <p>
                   内容：
