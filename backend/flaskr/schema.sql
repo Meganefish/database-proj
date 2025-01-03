@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS Report;
 DROP TABLE IF EXISTS Forum;
 DROP TABLE IF EXISTS Apply;
 
+DROP TABLE IF EXISTS post_images;
 DROP TABLE IF EXISTS user_apply;
 DROP TABLE IF EXISTS take;
 DROP TABLE IF EXISTS release_post;
@@ -48,6 +49,7 @@ CREATE TABLE Post (
 );
 CREATE TABLE Comment (
     comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    liked INTEGER DEFAULT 0,
     body TEXT NOT NULL
 );
 CREATE TABLE Report(
@@ -58,7 +60,7 @@ CREATE TABLE Report(
 CREATE TABLE Forum (
     forum_id INTEGER PRIMARY KEY  AUTOINCREMENT,
     forum_name VARCHAR(100) NOT NULL UNIQUE ,
-    description TEXT,
+    description TEXT  CHECK(length(description) <= 100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -68,6 +70,14 @@ CREATE TABLE Apply(
     description TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     apply_status INTEGER DEFAULT 0         --ENUM('pending':0,'resolved':1,'rejected':2)
+);
+
+CREATE TABLE post_images (
+    image_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    image_path TEXT NOT NULL,
+    uploaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES Post(post_id) ON DELETE CASCADE
 );
 
 CREATE TABLE user_apply(
@@ -90,7 +100,7 @@ CREATE TABLE release_post (
     user_id INTEGER,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (post_id) REFERENCES Posts(post_id),
+    FOREIGN KEY (post_id) REFERENCES Post(post_id),
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     PRIMARY KEY (post_id, user_id)
 );
@@ -100,7 +110,7 @@ CREATE TABLE browse (
     start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     duration INTEGER DEFAULT 0,
     is_like INTEGER DEFAULT 0,
-    FOREIGN KEY (post_id) REFERENCES Posts(post_id),
+    FOREIGN KEY (post_id) REFERENCES Post(post_id),
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     PRIMARY KEY (post_id, user_id)
 );
@@ -133,7 +143,7 @@ CREATE TABLE release_report (
     user_id INTEGER,
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP,
-    FOREIGN KEY (report_id) REFERENCES Reports(report_id),
+    FOREIGN KEY (report_id) REFERENCES Report(report_id),
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     PRIMARY KEY (report_id, user_id)
 );
@@ -141,7 +151,7 @@ CREATE TABLE com_post (
     comment_id INTEGER,
     post_id INTEGER,
     FOREIGN KEY (comment_id) REFERENCES comment(comment_id),
-    FOREIGN KEY (post_id) REFERENCES Posts(post_id),
+    FOREIGN KEY (post_id) REFERENCES Post(post_id),
     PRIMARY KEY (comment_id, post_id)
 );
 CREATE TABLE parent (
@@ -154,34 +164,88 @@ CREATE TABLE parent (
 CREATE TABLE report_post (
     report_id INTEGER,
     post_id INTEGER ,
-    FOREIGN KEY (report_id) REFERENCES Reports(report_id),
-    FOREIGN KEY (post_id) REFERENCES Posts(post_id),
+    FOREIGN KEY (report_id) REFERENCES Report(report_id),
+    FOREIGN KEY (post_id) REFERENCES Post(post_id),
     PRIMARY KEY (report_id, post_id)
 );
 CREATE TABLE report_comment (
     report_id INTEGER,
     comment_id INTEGER ,
-    FOREIGN KEY (report_id) REFERENCES Reports(report_id),
+    FOREIGN KEY (report_id) REFERENCES Report(report_id),
     FOREIGN KEY (comment_id) REFERENCES comment(comment_id),
     PRIMARY KEY (report_id, comment_id)
 );
 CREATE TABLE post_forum (
     post_id INTEGER,
     forum_id INTEGER,
-    FOREIGN KEY (post_id) REFERENCES Posts(post_id),
-    FOREIGN KEY (forum_id) REFERENCES Forums(forum_id),
+    FOREIGN KEY (post_id) REFERENCES Post(post_id),
+    FOREIGN KEY (forum_id) REFERENCES Forum(forum_id),
     PRIMARY KEY (post_id, forum_id)
 );
 CREATE TABLE manage_forum (
     forum_id INTEGER,
     user_id INTEGER,
-    FOREIGN KEY (forum_id) REFERENCES Forums(forum_id),
+    FOREIGN KEY (forum_id) REFERENCES Forum(forum_id),
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     PRIMARY KEY (forum_id, user_id)
 );
 
-INSERT INTO User (username, password, nickname, grade, major, category) VALUES
-('admin', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', 'admin', 0, 'Not applicable', 'admin');
+CREATE TRIGGER update_commented_on_insert
+AFTER INSERT ON com_post
+FOR EACH ROW
+BEGIN
+    UPDATE Post
+    SET commented = commented + 1
+    WHERE post_id = NEW.post_id;
+END;
+
+CREATE TRIGGER update_commented_on_delete
+AFTER DELETE ON Comment
+FOR EACH ROW
+BEGIN
+    UPDATE Post
+    SET commented = commented - 1
+    WHERE post_id = OLD.post_id;
+END;
+
+CREATE TRIGGER update_liked_post_on_insert
+AFTER INSERT ON like_post
+FOR EACH ROW
+BEGIN
+    UPDATE Post
+    SET liked = liked + 1
+    WHERE post_id = NEW.post_id;
+END;
+
+CREATE TRIGGER update_liked_post_on_delete
+AFTER DELETE ON like_post
+FOR EACH ROW
+BEGIN
+    UPDATE Post
+    SET liked = liked - 1
+    WHERE post_id = OLD.post_id;
+END;
+
+CREATE TRIGGER update_liked_comment_on_insert
+AFTER INSERT ON like_comment
+FOR EACH ROW
+BEGIN
+    UPDATE Comment
+    SET liked = liked + 1
+    WHERE comment_id = NEW.comment_id;
+END;
+
+CREATE TRIGGER update_liked_comment_on_delete
+AFTER DELETE ON like_comment
+FOR EACH ROW
+BEGIN
+    UPDATE Comment
+    SET liked = liked - 1
+    WHERE comment_id = OLD.comment_id;
+END;
+
+INSERT INTO User (user_id, username, password, nickname, grade, major, category) VALUES
+(0, 'admin', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', 'admin', 0, 'Not applicable', 'admin');
 
 INSERT INTO User (username, password, nickname, grade, major) VALUES
 ('123', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '张三', 2021, '计算机科学与技术'),
@@ -371,9 +435,12 @@ INSERT INTO com_post (comment_id, post_id) VALUES
 (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7),
 (8, 8), (9, 9), (10, 10), (11, 11), (12, 12), (13, 13), (14, 14),
 (15, 15), (16, 16), (17, 17), (18, 18), (19, 19), (20, 20),
-(21, 1), (22, 2), (23, 3), (24, 4), (25, 5), (26, 6), (27, 7),
-(28, 8), (29, 9), (30, 10), (31, 11), (32, 12), (33, 13), (34, 14),
-(35, 15), (36, 16), (37, 17), (38, 18), (39, 19), (40, 20);
+(21, 1), (22, 1), (23, 3), (24, 3), (25, 5), (26, 1), (27, 8),
+(28, 8), (29, 9), (30, 10), (31, 10), (32, 12), (33, 14), (34, 14),
+(35, 15), (36, 13), (37, 1), (38, 2), (39, 11), (40, 20);
+
+INSERT INTO parent (comment_id, parent_comment_id) VALUES
+(21, 1), (22, 21), (37, 21), (24, 3), (34, 14), (40, 20);
 
 
 INSERT INTO parent (parent_comment_id, comment_id) VALUES
@@ -402,3 +469,10 @@ VALUES
 INSERT INTO manage_forum (user_id, forum_id) VALUES
 (1, 1), (1, 2), (1, 3), (2, 4),
 (3, 5), (3, 6), (3, 7), (6, 8);
+
+
+INSERT INTO like_comment(user_id, comment_id) VALUES
+(1, 1), (1, 3), (1, 14), (2, 4), (4, 5);
+
+INSERT INTO like_post(user_id, post_id) VALUES
+(1, 1), (1, 2), (3, 4), (5, 6), (6, 12);

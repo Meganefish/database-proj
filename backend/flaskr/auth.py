@@ -142,7 +142,44 @@ def profile():
         SELECT * FROM User u WHERE u.user_id = ?
     ''', (user_id, )).fetchone()
     user_dict = dict(user_profile)
-    return jsonify(user_dict)
+    posts = db.execute('''
+            SELECT * 
+            FROM release_post rp
+            JOIN Post p ON p.post_id = rp.post_id
+            WHERE rp.user_id = ?
+        ''', (user_id,)).fetchall()
+    post_dict = [dict(post) for post in posts]
+    return jsonify({
+        'user': user_dict,
+        'posts': post_dict
+    })
+
+@bp.route('/visit_user<int:visit_user_id>', methods=['GET'])
+def visit_user(visit_user_id):
+    if not g.user:
+        return jsonify({
+            'success': False,
+            'message': '请先登录'
+        })
+    db = get_db()
+    user_id = g.user['user_id']
+    if visit_user_id == user_id:
+        redirect(url_for('auth.profile'))
+    user_profile = db.execute('''
+            SELECT * FROM User u WHERE u.user_id = ?
+        ''', (visit_user_id,)).fetchone()
+    user_dict = dict(user_profile)
+    posts = db.execute('''
+                SELECT * 
+                FROM release_post rp
+                JOIN Post p ON p.post_id = rp.post_id
+                WHERE rp.user_id = ?
+            ''', (visit_user_id,)).fetchall()
+    post_dict = [dict(post) for post in posts]
+    return jsonify({
+        'user': user_dict,
+        'posts': post_dict
+    })
 
 
 @bp.route('/reset_password', methods=['POST'])
