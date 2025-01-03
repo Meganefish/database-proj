@@ -24,48 +24,32 @@ def login_checked(f):
 
 @bp.route('/', methods=['GET'])
 def index():
-    return redirect(url_for('blog.page', page_id=1))
-
-
-@bp.route('/p<int:page_id>', methods=['GET'])
-def page(page_id):
-    posts_per_page = 20
-    offset = (page_id - 1) * posts_per_page
     db = get_db()
     posts_query = """
-            SELECT p.*,u.nickname
-            FROM release_post rp
-            JOIN post p ON rp.post_id = p.post_id
-            JOIN user u ON u.user_id = rp.user_id
-            ORDER BY rp.updated DESC
-            LIMIT ? OFFSET ?
-        """
-    posts = db.execute(posts_query, [posts_per_page, offset]).fetchall()
+                SELECT *
+                FROM release_post rp
+                JOIN post p ON rp.post_id = p.post_id
+                JOIN user u ON u.user_id = rp.user_id
+                ORDER BY rp.updated DESC
+            """
+    posts = db.execute(posts_query).fetchall()
     posts_list = [dict(post) for post in posts]
     return jsonify(posts_list)
 
 
 @bp.route('/forum<int:forum_id>', methods=['GET'])
 def forum(forum_id):
-    return redirect(url_for('blog.forumPage', page_id=1, forum_id=forum_id))
-
-
-@bp.route('/forum<int:forum_id>/p<int:page_id>', methods=['GET'])
-def forumPage(forum_id, page_id):
-    posts_per_page = 20
-    offset = (page_id - 1) * posts_per_page
     db = get_db()
     posts_query = """
-            SELECT *
-            FROM post_forum pf
-            JOIN post p ON pf.post_id = p.post_id
-            JOIN release_post rp ON pf.post_id = rp.post_id
-            JOIN User u ON u.user_id = rp.user_id
-            WHERE pf.forum_id = ?
-            ORDER BY rp.updated DESC
-            LIMIT ? OFFSET ?
-        """
-    posts = db.execute(posts_query, [forum_id, posts_per_page, offset]).fetchall()
+               SELECT *
+               FROM post_forum pf
+               JOIN post p ON pf.post_id = p.post_id
+               JOIN release_post rp ON pf.post_id = rp.post_id
+               JOIN User u ON u.user_id = rp.user_id
+               WHERE pf.forum_id = ?
+               ORDER BY rp.updated DESC
+           """
+    posts = db.execute(posts_query, (forum_id,)).fetchall()
     # return render_template('blog/index.html', posts=posts, page_id=page_id)
     posts_list = [dict(post) for post in posts]
     return jsonify(posts_list)
@@ -150,7 +134,7 @@ def post(post_id):
         JOIN post_forum pf ON p.post_id = pf.post_id
         JOIN Forum f ON f.forum_id = pf.forum_id
         WHERE p.post_id = ?
-    ''', (post_id, )).fetchall()
+    ''', (post_id, )).fetchone()
     comments = db.execute('''
         SELECT *
         FROM Comment c

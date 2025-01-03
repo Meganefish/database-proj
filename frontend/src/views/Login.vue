@@ -2,10 +2,10 @@
   <div class="login-container">
     <el-card class="login-card" shadow="hover">
       <el-container class="login-title">
-      <img src="../assets/img/mingdao.png" class="logo">
-      <h1>高校论坛平台</h1>
+        <img src="../assets/img/personal_icon.png" class="logo">
+        <h1>高校论坛平台登录</h1>
       </el-container>
-      <el-form :model="form" :rules="rules"  label-width="100px">
+      <el-form :model="form" :rules="rules" label-width="100px">
         <!-- 登录身份选择 -->
         <el-form-item label="登录类型">
           <el-radio-group v-model="form.userType">
@@ -25,11 +25,7 @@
 
         <!-- 密码 -->
         <el-form-item label="密码" prop="password">
-          <el-input
-            v-model="form.password"
-            placeholder="请输入密码"
-            show-password
-          >
+          <el-input v-model="form.password" placeholder="请输入密码" show-password>
             <template #prefix>
               <!-- <el-icon><lock /></el-icon> -->
             </template>
@@ -55,25 +51,15 @@
 
         <!-- 登录和注册按钮 -->
         <el-form-item>
-          <el-row :gutter="50">
+          <el-row :gutter="0">
             <el-col :span="12">
-              <el-button
-                type="default"
-                @click="handleLogin"
-                plain
-                block
-              >
+              <el-button type="default" @click="handleLogin" plain block>
                 登录
               </el-button>
             </el-col>
             <el-col :span="12">
-              <el-button
-                type="default"
-                @click="handleRegister"
-                plain
-                block
-              >
-                注册
+              <el-button type="default" @click="handleRegister" plain block>
+                没有账号，前往注册
               </el-button>
             </el-col>
           </el-row>
@@ -117,15 +103,15 @@ export default {
 
     const handleLogin = () => {   // 表单验证
       // const loginForm = ref("loginForm");
-      try{
-        if (form.userType=="admin"){
+      try {
+        if (form.userType == "admin") {
           axios.post("/auth/admin_login", form).then((res) => {
             console.log(res.data.message);
             if (res.data.sucess == true) {
               ElMessage.success("登录成功");
               const homeUrl = window.location.href.replace(/\/admin_login$/, "/admin_home");
               setTimeout(() => {
-                window.location.href = homeUrl; 
+                window.location.href = homeUrl;
               }, 1000); // 等待 1 秒
             } else {
               ElMessage.error(res.data.message || "登录失败");
@@ -133,34 +119,36 @@ export default {
             }
           })
         }
-        else{
+        else {
           axios.post("/auth/login", form).then((res) => {
             // loading.value = true;
             console.log(res.data.message);
             if (res.data.success == true) {
-              ElMessage.success({message:"登录成功",duration:1200,
-                    onClose:()=>{
-                        const Url = window.location.href.replace(/\/login$/, "/home");
-                        window.location.href = Url; 
-                        }});
+              ElMessage.success({
+                message: "登录成功", duration: 1200,
+                onClose: () => {
+                  const Url = window.location.href.replace(/\/login$/, "/home");
+                  window.location.href = Url;
+                }
+              });
             } else {
               ElMessage.error(res.data.message || "登录失败");
               // refreshCaptcha();
             }
           })
-        }        
-      }catch(error){
-            // loading.value = false;
-            ElMessage.error(error.message || "请求出错");
-            // refreshCaptcha();
+        }
+      } catch (error) {
+        // loading.value = false;
+        ElMessage.error(error.message || "请求出错");
+        // refreshCaptcha();
       }
     };
-    const handleRegister = () =>{
-      try{
+    const handleRegister = () => {
+      try {
         const Url = window.location.href.replace(/\/login$/, "/register");
         window.location.href = Url;
-      }catch(error){
-            ElMessage.error(error.message || "请求出错");
+      } catch (error) {
+        ElMessage.error(error.message || "请求出错");
       }
     };
 
@@ -186,10 +174,12 @@ export default {
   background: url('../assets/img/background.jpg');
   background-size: cover;
 }
+
 .login-card {
-  width: 400px;
+  width: 410px;
 }
-.login-title{
+
+.login-title {
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -199,18 +189,19 @@ export default {
   flex-grow: 0;
 }
 
-.login-title h1{
+.login-title h1 {
   font-size: 22px;
   line-height: 22px;
   margin: 0;
   margin-left: 5px;
   font-weight: 500;
 }
+
 /* .captcha-img-container {
   text-align: center;
   cursor: pointer;
 } */
-.logo{
+.logo {
   width: 50px;
   height: 50px;
 }

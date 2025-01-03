@@ -124,7 +124,7 @@ def load_logged_in_user():
 def logout():
     session.clear()
     return jsonify({
-        'suceess': True,
+        'success': True,
         'message': '登出成功'
     })
 
