@@ -63,6 +63,14 @@ const router = createRouter({
           },
       component: ()=>import('../views/Post_detail.vue')
     },
+    {
+      path: '/job',   
+      name: 'JobPage',
+      meta: {         
+            title: '招聘信息页' 
+          },
+      component: ()=>import('../views/Job.vue')
+    },
   ]
 })
 
