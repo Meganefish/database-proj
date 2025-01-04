@@ -1,5 +1,6 @@
 <template>
   <div class="admin-post">
+    <strong>管理帖子</strong>
     <el-table :data="paginatedData" style="width: 100%">
       <el-table-column prop="post_id" label="post_ID" width="80"></el-table-column>
       <el-table-column prop="title" label="帖子标题" width="180"></el-table-column>
@@ -66,6 +67,26 @@ export default {
       return this.posts.slice(start, end);  // 返回当前页的数据
     }
   },
+  setup(){
+    function Timetrans(gmtTime) {
+      const date = new Date(gmtTime);
+      const options = {
+        timeZone: "Asia/Shanghai",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      };
+      const formatter = new Intl.DateTimeFormat("zh-CN", options);
+      return formatter.format(date);
+    }
+    return {
+      Timetrans
+    };
+  },
   methods: {
     formatPostBody(body) {
       if (body.length > 30) {
@@ -81,6 +102,9 @@ export default {
       try {
         const response = await axios.get('/admin/get_posts');  // 调用后端接口获取帖子数据
         this.posts = response.data;  // 假设接口返回的数据是帖子列表
+        this.posts.forEach(post => {
+          post.created = this.Timetrans(post.created);  // 格式化时间
+        });
       } catch (error) {
         console.error('获取帖子数据失败', error);
       }
@@ -88,7 +112,7 @@ export default {
     // 删除帖子
     async deletePost(postId) {
       try {
-        const response = await axios.post(`/admin/delete_post${postId}`);  // 调用后端接口删除帖子
+        const response = await axios.post(`/safe_delete_post${postId}`);  // 调用后端接口删除帖子
         if(response.data.success !== true) {
           throw new Error(response.data.message||'删除帖子失败');
         }

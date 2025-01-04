@@ -24,7 +24,7 @@
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu>
-                        <el-dropdown-item @click="goToRoute('/profile')">个人界面</el-dropdown-item>
+                        <el-dropdown-item @click="goToProfile()">个人界面</el-dropdown-item>
                         <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
@@ -98,6 +98,12 @@ export default {
             const end = start + pageSize.value;
             return displayedPosts.value.slice(start, end);
         });
+        const goToProfile = async () => {
+            const response = await axios.get("/get_logged_user");
+            const user_id = response.data.user_id;
+            router.push(`/profile/user${user_id}`);
+        };
+
         const submitApply = async () => {
             ElMessageBox({
                 title: '创建板块',
@@ -269,6 +275,7 @@ export default {
             totalPosts,
             currentPage,
             pageSize,
+            goToProfile,
             fetchPosts,
             handleBlockChange,
             handleLogout,

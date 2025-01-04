@@ -91,6 +91,7 @@ CREATE TABLE user_apply(
 CREATE TABLE take (
     user_id INTEGER,
     course_id INTEGER,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (course_id) REFERENCES Course(course_id),
     PRIMARY KEY (user_id, course_id)
@@ -224,6 +225,16 @@ BEGIN
     UPDATE Post
     SET liked = liked - 1
     WHERE post_id = OLD.post_id;
+END;
+
+CREATE TRIGGER update_release_post_on_post_change
+AFTER UPDATE ON Post
+FOR EACH ROW
+BEGIN
+    UPDATE release_post
+    SET updated = CURRENT_TIMESTAMP
+    WHERE post_id = NEW.post_id
+      AND (OLD.title != NEW.title OR OLD.body != NEW.body);
 END;
 
 CREATE TRIGGER update_liked_comment_on_insert
@@ -405,7 +416,7 @@ INSERT INTO Apply(name, description) VALUES
 ('体育竞技', '体育爱好者的交流平台');
 
 INSERT INTO user_apply(user_id, apply_id) VALUES
-(1, 1), (3,2);
+(1, 1), (3, 2), (1, 3), (4, 4), (6, 5);
 
 INSERT INTO take (user_id, course_id) VALUES
 (1, 1), (1, 2), (1, 3), (2, 4), (2, 5), (3, 6), (3, 7),

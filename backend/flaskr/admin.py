@@ -5,7 +5,6 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 from db import get_db
-
 bp = Blueprint('admin', __name__, url_prefix='/admin')  # 无urlprefix，因此用于根目录
 
 
@@ -99,7 +98,7 @@ def accept_report(report_id):
         ''', (report_id,)).fetchone()
     if report_comment is not None:
         comment_id = report_comment[0]
-        delete_comments(comment_id)
+        safe_delete_post(comment_id)
         db.execute('''
             UPDATE Report SET report_status = 1 WHERE report_id = ?
         ''', (report_id, ))

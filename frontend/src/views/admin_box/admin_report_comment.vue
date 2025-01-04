@@ -1,5 +1,6 @@
 <template>
   <div class="admin-report">
+    <strong>评论举报</strong>
     <el-table :data="paginatedData" style="width: 100%">
       <el-table-column prop="report_id" label="报告ID" width="80"></el-table-column>
       <el-table-column prop="body" label="举报评论内容" width="200">
@@ -79,6 +80,26 @@ export default {
       return this.reports.slice(start, end);  // 返回当前页的数据
     }
   },
+  setup(){
+    function Timetrans(gmtTime) {
+      const date = new Date(gmtTime);
+      const options = {
+        timeZone: "Asia/Shanghai",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      };
+      const formatter = new Intl.DateTimeFormat("zh-CN", options);
+      return formatter.format(date);
+    }
+    return {
+      Timetrans
+    };
+  },
   methods: {
     // 格式化举报理由：如果长度大于30，则显示省略号
     formatReason(reason) {
@@ -105,6 +126,9 @@ export default {
       try {
         const response = await axios.get('/admin/get_reports');
         this.reports = response.data.report_comments;  // 假设接口返回的是举报列表
+        this.reports.forEach(report => {
+          report.created = this.Timetrans(report.created);  // 格式化时间
+        });
       } catch (error) {
         console.error('获取举报数据失败', error);
       }

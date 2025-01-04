@@ -138,7 +138,7 @@ def release_post(forum_id):
         return jsonify({
             'success': False,
             'message': '找不到论坛'
-        }), 404
+        })
     db.execute('''
             INSERT INTO Post (title, body) VALUES (?,?)
         ''', (title, body,))
@@ -299,7 +299,7 @@ def cancel_like(comment_id):
         return jsonify({
             'success': False,
             'message': '取消点赞失败，未存在该记录'
-        }), 404
+        })
     db.execute('''
             DELETE FROM like_comment WHERE user_id = ? AND comment_id = ?
         ''', (user_id, comment_id))
@@ -426,7 +426,7 @@ def search_posts():
             "success": False,
             "message": "查询失败，关键词为空",
             "post": posts
-        }), 400
+        })
     try:
         query = """
         SELECT *
@@ -461,7 +461,7 @@ def f_search_posts(forum_id):
             "success": False,
             "message": "查询失败，关键词为空",
             "posts": posts
-        }), 400
+        })
     try:
         query = """
         SELECT *
@@ -518,3 +518,120 @@ def edit_post(post_id):
         'success': True,
         'message': '修改帖子成功'
     }), 200
+
+
+@bp.route('/get_logged_user', methods=['GET'])
+@login_checked
+def get_logged_user():
+    return jsonify(dict(g.user))
+
+
+@bp.route('/safe_delete_comment<int:comment_id>', methods=['POST'])
+@login_checked
+def safe_delete_comment(comment_id):
+    db = get_db()
+    db.execute('''
+        DELETE FROM comment WHERE comment_id = ?
+    ''', (comment_id, ))
+    db.commit()
+
+    db.execute('''
+        DELETE FROM release_comment WHERE comment_id = ?
+    ''', (comment_id, ))
+    db.commit()
+
+    db.execute('''
+        DELETE FROM com_post WHERE comment_id = ?
+    ''', (comment_id, ))
+    db.commit()
+
+    db.execute('''
+        DELETE FROM like_comment WHERE comment_id = ?
+    ''', (comment_id, ))
+    db.commit()
+
+    comment_reports = db.execute('''
+        SELECT report_id
+        FROM report_comment WHERE comment_id = ?
+    ''', (comment_id, )).fetchall()
+    for comment_report in comment_reports:
+        db.execute('''
+            DELETE FROM Report WHERE report_id = ?
+        ''', (comment_report[0], ))
+        db.execute('''
+            DELETE FROM release_report WHERE report_id = ?
+        ''', (comment_report[0], ))
+        db.commit()
+    db.execute('''
+        DELETE FROM report_comment WHERE comment_id = ?
+    ''', (comment_id, ))
+    db.commit()
+
+    child_comments = db.execute('''
+        SELECT comment_id
+        FROM parent WHERE parent_comment_id = ?
+    ''', (comment_id, )).fetchall()
+    for child_comment in child_comments:
+        safe_delete_comment(child_comment[0])
+    db.execute('''
+        DELETE FROM parent WHERE parent_comment_id = ?
+    ''', (comment_id, ))
+    db.commit()
+    return jsonify({
+        'success': True,
+        'message': '安全删除评论成功'
+    })
+
+
+@bp.route('/safe_delete_post<int:post_id>', methods=['POST'])
+@login_checked
+def safe_delete_post(post_id):
+    db = get_db()
+    db.execute('''
+        DELETE FROM post WHERE post_id = ?
+    ''', (post_id, ))
+    db.commit()
+
+    db.execute('''
+        DELETE FROM release_post WHERE post_id = ?
+    ''', (post_id, ))
+    db.commit()
+
+    db.execute('''
+        DELETE FROM post_forum WHERE post_id = ?
+    ''', (post_id, ))
+    db.commit()
+
+    db.execute('''
+        DELETE FROM like_post WHERE post_id = ?
+    ''', (post_id, ))
+    db.commit()
+
+    post_reports = db.execute('''
+        SELECT report_id
+        FROM report_post WHERE post_id = ?
+    ''', (post_id, ))
+    for post_report in post_reports:
+        db.execute('''
+            DELETE FROM Report WHERE report_id = ? 
+        ''', (post_report[0], ))
+        db.execute('''
+            DELETE FROM release_report WHERE report_id = ?
+        ''', (post_report[0], ))
+        db.commit()
+    db.execute('''
+        DELETE FROM report_post WHERE post_id = ?
+    ''', (post_id, ))
+    db.commit()
+
+    comments = db.execute('''
+        SELECT comment_id
+        FROM com_post WHERE post_id = ?
+    ''', (post_id, )).fetchall()
+    for comment in comments:
+        safe_delete_comment(comment[0])
+
+    return jsonify({
+        'success': True,
+        'message': '安全删除帖子成功'
+    })
