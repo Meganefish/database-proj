@@ -47,14 +47,14 @@ const router = createRouter({
       },
       component: ()=>import('../views/Register.vue')
     },
-    // {
-    //   path: '/post_edit',  // 路径
-    //   name: 'post_edit',  //名字
-    //   meta: {         
-    //     title: '帖子编辑页' 
-    //   },
-    //   component: ()=>import('../views/Post_edit.vue')
-    // },
+    {
+      path: '/post_edit',  // 路径
+      name: 'post_edit',  //名字
+      meta: {         
+        title: '帖子编辑页' 
+      },
+      component: ()=>import('../views/Post_edit.vue')
+    },
     {
       path: '/post',   
       name: 'DetailPage',

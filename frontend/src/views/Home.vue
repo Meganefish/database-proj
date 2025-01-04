@@ -15,7 +15,7 @@
             </el-select>
             <el-input class="action-search" placeholder="搜索帖子或内容" v-model="searchQuery" clearable
                 prefix-icon="el-icon-search" @keyup.enter="handleSearch" />
-            <el-button type="primary" @click="goToRoute('/post_create')">发布帖子</el-button>
+            <el-button type="primary" @click="goToRoute('/post_edit')">发布帖子</el-button>
             <el-button type="primary" @click="goToRoute('/forum/create')">申请版块</el-button>
             <el-dropdown trigger="click">
                 <span class="avatar-dropdown">
@@ -167,7 +167,6 @@ export default {
         };
 
         const goToPostDetail = (postId) => {
-            // router.push("/post/"+postId);
             router.push({path:'/post',query: {id:postId}})
         };
 
