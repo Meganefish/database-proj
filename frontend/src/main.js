@@ -5,7 +5,6 @@ import ElementPlus from 'element-plus'
 import  zhCn  from 'element-plus/dist/locale/zh-cn.mjs'
 import axios from 'axios'
 import 'element-plus/dist/index.css'
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 axios.defaults.baseURL = 'http://localhost:2025'; 

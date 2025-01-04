@@ -14,8 +14,9 @@
                     :value="block.forum_id" />
             </el-select>
             <el-input class="action-search" placeholder="搜索帖子或内容" v-model="searchQuery" clearable
-                prefix-icon="el-icon-search" @keyup.enter="handleSearch" />
-            <el-button type="primary" @click="goToRoute('/post_create')">发布帖子</el-button>
+                @keyup.enter="Search" />
+            <el-button type="default" @click="Search()">🔍搜索</el-button>
+            <el-button type="primary" @click="goToRoute('/post_edit')">发布帖子</el-button>
             <el-button type="primary" @click="submitApply()">申请版块</el-button>
             <el-dropdown trigger="click">
                 <span class="avatar-dropdown">
@@ -35,6 +36,11 @@
                 <div v-if="selectedBlockId" class="section-description">
                     <span>版块简介：{{ Description }}</span>
                 </div>
+                <el-card v-if="totalPosts == 0" shadow="hover">
+                    <p class="post-stats" style="font-size: 1em">
+                        {{ "暂无相关信息哦" }}
+                    </p>
+                </el-card>
                 <el-row :gutter="20" v-for="post in paginatedPosts" :key="post.post_id">
                     <el-col :span="24" class="post-card">
                         <el-card shadow="hover">
@@ -140,13 +146,13 @@ export default {
         const submitForum = async (title, description) => {
             try {
 
-                const response = await axios.post('/apply_forum', { 'forum_name':title, 'description':description });
-                if(response.data.success !== true){                    
+                const response = await axios.post('/apply_forum', { 'forum_name': title, 'description': description });
+                if (response.data.success !== true) {
                     ElMessage.error(response.data.message || '提交申请失败');
-                }else{
+                } else {
                     ElMessage.success('提交申请成功');
                 }
-                
+
             } catch (error) {
                 console.error('申请失败:', error);
                 ElMessage({
@@ -174,12 +180,30 @@ export default {
                 }
                 else {
                     tip = "/forum" + selectedBlockId.value;
-                    Description.value = forumBlocks.value[selectedBlockId.value - 1].description;
+                    Description.value = forumBlocks.value.find(c => c.forum_id === selectedBlockId.value).description;
                     console.log(Description.value);
                 }
                 const response = await axios.get(tip);
                 displayedPosts.value = response.data;
                 totalPosts.value = response.data.length;
+                console.log(displayedPosts.value);
+            } catch (error) {
+                console.error("获取帖子数据失败：", error);
+            }
+        };
+        const Search = async () => {
+            try {
+                var tip = "/search_posts?keyword=";
+                if (selectedBlockId.value == null) {
+                    tip = "/search_posts?keyword=" + searchQuery.value;
+                }
+                else {
+                    tip = "/forum" + selectedBlockId.value + "/search_posts?keyword=" + searchQuery.value;
+                }
+                const response = await axios.get(tip);
+                displayedPosts.value = response.data.posts;
+                totalPosts.value = displayedPosts.value.length;
+                console.log(displayedPosts.value);
             } catch (error) {
                 console.error("获取帖子数据失败：", error);
             }
@@ -204,6 +228,7 @@ export default {
 
         const handleBlockChange = () => {
             currentPage.value = 1;
+            searchQuery.value = "";
             fetchPosts();
         };
         const handleLogout = () => {
@@ -223,21 +248,12 @@ export default {
             } catch (error) { ElMessage.error(error.message || "请求出错"); }
         };
 
-        const handleSearch = () => {
-            alert(`搜索：${searchQuery.value}`);
-        };
-
         const goToRoute = (route) => {
             router.push(route);
         };
 
         const goToPostDetail = (postId) => {
-<<<<<<< HEAD
-            // router.push("/post/"+postId);
             router.push({ path: '/post', query: { id: postId } })
-=======
-            router.push({path:'/post',query: {id:postId}})
->>>>>>> 9af3392078b19e44994816e44128d8c063910f85
         };
 
         onMounted(() => {
@@ -256,14 +272,14 @@ export default {
             fetchPosts,
             handleBlockChange,
             handleLogout,
-            handleSearch,
             goToRoute,
             goToPostDetail,
             Timetrans,
             updatePagination,
             paginatedPosts,
             Description,
-            submitApply
+            submitApply,
+            Search,
         };
     },
 };
