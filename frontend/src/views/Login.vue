@@ -107,12 +107,13 @@ export default {
         if (form.userType == "admin") {
           axios.post("/auth/admin_login", form).then((res) => {
             console.log(res.data.message);
-            if (res.data.sucess == true) {
-              ElMessage.success("登录成功");
-              const homeUrl = window.location.href.replace(/\/admin_login$/, "/admin_home");
-              setTimeout(() => {
-                window.location.href = homeUrl;
-              }, 1000); // 等待 1 秒
+            if (res.data.success == true) {              
+              ElMessage.success({
+                message: "登录成功", duration: 500,
+                onClose: () => {
+                  window.location.href = "/admin_home";
+                }
+              });
             } else {
               ElMessage.error(res.data.message || "登录失败");
               // refreshCaptcha();
@@ -125,7 +126,7 @@ export default {
             console.log(res.data.message);
             if (res.data.success == true) {
               ElMessage.success({
-                message: "登录成功", duration: 1200,
+                message: "登录成功", duration: 500,
                 onClose: () => {
                   const Url = window.location.href.replace(/\/login$/, "/home");
                   window.location.href = Url;

@@ -97,7 +97,7 @@ def admin_login():
         })
     # 验证成功后，用户id存储在以新会话（session:用于存储横跨请求的值的dict）中;session数据会存储到一个向浏览器发送的cookie中。
     session.clear()
-    session['user_id'] = user['id']
+    session['user_id'] = user['user_id']
     return jsonify({
         'success': True,
         'message': '登录成功'

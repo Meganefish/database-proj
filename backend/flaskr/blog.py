@@ -79,7 +79,7 @@ def apply_forum():
         })
     try:
         db.execute('''
-                    INSERT INTO Apply (forum_name, description) VALUE (?,?)
+                    INSERT INTO Apply (name, description) VALUES (?,?)
                 ''', (forum_name, description,))
         db.commit()
     except Exception as e:
@@ -474,3 +474,35 @@ def f_search_posts(forum_id):
             "message": "查询失败",
             "posts": posts
         }), 500
+
+
+@bp.route('/post<int:post_id>/edit_post', methods=['POST'])
+@login_checked
+def edit_post(post_id):
+    db = get_db()
+    title = request.get_json().get('title')
+    body = request.get_json().get('body')
+    images = request.get_json().get('images')
+    user_id = g.user['user_id']
+    if not title or not body:
+        return jsonify({
+            'success': False,
+            'message': '标题或内容为空'
+        })
+    db.execute('''
+            UPDATE User SET (title, body) = (?, ?) WHERE user_id = ?
+        ''', (title, body, user_id, ))
+    db.commit()
+
+    if not images:
+        try:
+            save_pic_topic(images, post_id, db)
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'message': '图片上传失败'
+            })
+    return jsonify({
+        'success': True,
+        'message': '修改帖子成功'
+    }), 200
