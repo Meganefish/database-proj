@@ -79,7 +79,7 @@ def apply_forum():
         })
     try:
         db.execute('''
-                    INSERT INTO Apply (forum_name, description) VALUE (?,?)
+                    INSERT INTO Apply (name, description) VALUES (?,?)
                 ''', (forum_name, description,))
         db.commit()
     except Exception as e:

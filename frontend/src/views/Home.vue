@@ -16,7 +16,7 @@
             <el-input class="action-search" placeholder="搜索帖子或内容" v-model="searchQuery" clearable
                 prefix-icon="el-icon-search" @keyup.enter="handleSearch" />
             <el-button type="primary" @click="goToRoute('/post_create')">发布帖子</el-button>
-            <el-button type="primary" @click="goToRoute('/forum/create')">申请版块</el-button>
+            <el-button type="primary" @click="submitApply()">申请版块</el-button>
             <el-dropdown trigger="click">
                 <span class="avatar-dropdown">
                     <el-avatar src="person.ico" />
@@ -70,7 +70,7 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import router from '@/router/Router.js'
-import { ElMessage } from "element-plus";
+import { ElMessageBox, ElMessage } from "element-plus";
 
 export default {
     name: "Home_Page",
@@ -82,7 +82,9 @@ export default {
         const totalPosts = ref(0);
         const currentPage = ref(1);
         const pageSize = ref(5);
-        const Description =ref("");
+        const Description = ref("");
+        const title = ref('');
+        const description = ref('');
 
         // 计算当前页显示的帖子
         const paginatedPosts = computed(() => {
@@ -90,6 +92,69 @@ export default {
             const end = start + pageSize.value;
             return displayedPosts.value.slice(start, end);
         });
+        const submitApply = async () => {
+            ElMessageBox({
+                title: '创建板块',
+                message: `
+                    <div>
+                        <div>
+                        <label for="title">版块名称:</label>
+                        <input id="title" placeholder="请输入版块名称"></input>
+                        </div>
+                        <div>
+                        <label for="description">版块描述:</label>
+                        <input id="description" type="textarea" placeholder="请输入版块描述"></input>
+                        </div>
+                    </div>
+                `,
+                dangerouslyUseHTMLString: true, // 允许使用 HTML 字符串
+                showCancelButton: true,
+                confirmButtonText: "提交申请",
+                cancelButtonText: "取消",
+                beforeClose: (action, instance, done) => {
+                    if (action === 'confirm') {
+                        const titleValue = document.getElementById("title").value;
+                        const descriptionValue = document.getElementById("description").value;
+                        if (!titleValue || !descriptionValue) {
+                            ElMessage({
+                                type: 'warning',
+                                message: '标题和描述都不能为空！',
+                            });
+                            done();
+                            return;
+                        }
+                        title.value = titleValue;
+                        description.value = descriptionValue;
+                        submitForum(title.value, description.value);
+                    }
+                    done();
+                }
+            })
+                .catch(() => {
+                    ElMessage({
+                        type: "info",
+                        message: "申请已取消",
+                    });
+                });
+        };
+        const submitForum = async (title, description) => {
+            try {
+
+                const response = await axios.post('/apply_forum', { 'forum_name':title, 'description':description });
+                if(response.data.success !== true){                    
+                    ElMessage.error(response.data.message || '提交申请失败');
+                }else{
+                    ElMessage.success('提交申请成功');
+                }
+                
+            } catch (error) {
+                console.error('申请失败:', error);
+                ElMessage({
+                    type: 'error',
+                    message: '提交申请失败，请重试',
+                });
+            }
+        };
 
         const fetchForumBlocks = async () => {
             try {
@@ -103,13 +168,13 @@ export default {
         const fetchPosts = async () => {
             try {
                 var tip = "/";
-                if (selectedBlockId.value == null) { 
+                if (selectedBlockId.value == null) {
                     tip = "/";
-                    Description.value= "";
+                    Description.value = "";
                 }
-                else { 
+                else {
                     tip = "/forum" + selectedBlockId.value;
-                    Description.value =forumBlocks.value[selectedBlockId.value-1].description;
+                    Description.value = forumBlocks.value[selectedBlockId.value - 1].description;
                     console.log(Description.value);
                 }
                 const response = await axios.get(tip);
@@ -168,7 +233,7 @@ export default {
 
         const goToPostDetail = (postId) => {
             // router.push("/post/"+postId);
-            router.push({path:'/post',query: {id:postId}})
+            router.push({ path: '/post', query: { id: postId } })
         };
 
         onMounted(() => {
@@ -194,6 +259,7 @@ export default {
             updatePagination,
             paginatedPosts,
             Description,
+            submitApply
         };
     },
 };
