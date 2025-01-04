@@ -63,6 +63,14 @@ const router = createRouter({
           },
       component: ()=>import('../views/Post_detail.vue')
     },
+    {
+      path: '/profile/user:user_id',   
+      name: 'UserProfile',
+      meta: {         
+            title: '帖子编辑页' 
+          },
+      component: ()=>import('../views/Profile.vue')
+    },
   ]
 })
 

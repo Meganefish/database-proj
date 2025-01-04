@@ -23,7 +23,7 @@
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu>
-                        <el-dropdown-item @click="goToRoute('/profile')">个人界面</el-dropdown-item>
+                        <el-dropdown-item @click="goToProfile()">个人界面</el-dropdown-item>
                         <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
@@ -92,6 +92,12 @@ export default {
             const end = start + pageSize.value;
             return displayedPosts.value.slice(start, end);
         });
+        const goToProfile = async () => {
+            const response = await axios.get("/get_logged_user");
+            const user_id = response.data.user_id;
+            router.push(`/profile/user${user_id}`);
+        };
+
         const submitApply = async () => {
             ElMessageBox({
                 title: '创建板块',
@@ -140,13 +146,13 @@ export default {
         const submitForum = async (title, description) => {
             try {
 
-                const response = await axios.post('/apply_forum', { 'forum_name':title, 'description':description });
-                if(response.data.success !== true){                    
+                const response = await axios.post('/apply_forum', { 'forum_name': title, 'description': description });
+                if (response.data.success !== true) {
                     ElMessage.error(response.data.message || '提交申请失败');
-                }else{
+                } else {
                     ElMessage.success('提交申请成功');
                 }
-                
+
             } catch (error) {
                 console.error('申请失败:', error);
                 ElMessage({
@@ -232,12 +238,7 @@ export default {
         };
 
         const goToPostDetail = (postId) => {
-<<<<<<< HEAD
-            // router.push("/post/"+postId);
             router.push({ path: '/post', query: { id: postId } })
-=======
-            router.push({path:'/post',query: {id:postId}})
->>>>>>> 9af3392078b19e44994816e44128d8c063910f85
         };
 
         onMounted(() => {
@@ -253,6 +254,7 @@ export default {
             totalPosts,
             currentPage,
             pageSize,
+            goToProfile,
             fetchPosts,
             handleBlockChange,
             handleLogout,

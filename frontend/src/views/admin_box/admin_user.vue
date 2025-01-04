@@ -1,5 +1,6 @@
 <template>
   <div class="admin-user">
+    <strong>管理用户</strong>
     <el-table :data="paginatedData" style="width: 100%">
       <el-table-column prop="user_id" label="ID" width="80"></el-table-column>
       <el-table-column prop="username" label="用户名" width="180"></el-table-column>
@@ -64,6 +65,26 @@ export default {
       return this.users.slice(start, end);  // 返回当前页的数据
     }
   },
+  setup() {
+    function Timetrans(gmtTime) {
+            const date = new Date(gmtTime);
+            const options = {
+                timeZone: "Asia/Shanghai",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                weekday: "long",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+            };
+            const formatter = new Intl.DateTimeFormat("zh-CN", options);
+            return formatter.format(date);
+        }
+    return {
+      Timetrans
+    };
+  },
   methods: {
     formatPassword(password) {
       if (password.length > 20) {
@@ -79,6 +100,9 @@ export default {
       try {
         const response = await axios.get('/admin/get_users', {});  // 调用后端接口获取用户数据
         this.users = response.data;  // 假设接口返回的数据是用户列表
+        this.users.forEach(user => {
+          user.created_at = this.Timetrans(user.created_at);  // 格式化时间
+        });
       } catch (error) {
         console.error('获取用户数据失败', error);
       }
