@@ -68,7 +68,6 @@ CREATE TABLE Apply(
     apply_id INTEGER PRIMARY KEY  AUTOINCREMENT,
     name VARCHAR(100) NOT NULL UNIQUE ,
     description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     apply_status INTEGER DEFAULT 0         --ENUM('pending':0,'resolved':1,'rejected':2)
 );
 
@@ -83,6 +82,7 @@ CREATE TABLE post_images (
 CREATE TABLE user_apply(
     user_id INTEGER,
     apply_id INTEGER,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (apply_id) REFERENCES Apply(apply_id),
     PRIMARY KEY (user_id, apply_id)
@@ -200,7 +200,7 @@ BEGIN
 END;
 
 CREATE TRIGGER update_commented_on_delete
-AFTER DELETE ON Comment
+AFTER DELETE ON com_post
 FOR EACH ROW
 BEGIN
     UPDATE Post

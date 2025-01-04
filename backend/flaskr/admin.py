@@ -50,14 +50,20 @@ def user_prev_admin(f):
 def get_reports():
     db = get_db()
     report_posts = db.execute('''
-        SELECT *
+        SELECT r.*, rr.created, u.username, p.title
         FROM report r
-        JOIN report_post rp ON r.post_id = rp.post_id 
+        JOIN report_post rp ON r.report_id = rp.report_id 
+        JOIN post p ON p.post_id = rp.post_id
+        JOIN release_report rr ON rr.report_id = r.report_id
+        JOIN user u ON u.user_id = rr.user_id
     ''').fetchall()
     report_comments = db.execute('''
-        SELECT *
+        SELECT r.*, rr.created, u.username, c.body
         FROM report r
-        JOIN report_comment rc ON r.post_id = rc.post_id 
+        JOIN report_comment rc ON r.report_id = rc.report_id 
+        JOIN comment c ON c.comment_id = rc.comment_id
+        JOIN release_report rr ON rr.report_id = r.report_id
+        JOIN user u ON u.user_id = rr.user_id
     ''')
     report_post_list = [dict(report_post) for report_post in report_posts]
     report_comment_list = [dict(report_comment) for report_comment in report_comments]
@@ -121,7 +127,7 @@ def reject_report(report_id):
         'message': '举报取消成功'
     }), 200
 
-@bp.route('/delete_post/<int:post_id>', methods=['POST'])
+@bp.route('/delete_post<int:post_id>', methods=['POST'])
 @user_prev
 def delete_post(post_id):
     db = get_db()
@@ -141,7 +147,7 @@ def delete_post(post_id):
                 'success': False,
                 'message': '没有权限在该论坛中删除此帖子'
             }), 403
-    db.execute('DELETE FROM Posts WHERE post_id = ?', (post_id,))
+    db.execute('DELETE FROM Post WHERE post_id = ?', (post_id,))
     db.commit()
     db.execute('DELETE FROM release_post WHERE post_id = ?', (post_id,))
     db.commit()
@@ -153,7 +159,7 @@ def delete_post(post_id):
     }), 200
 
 
-@bp.route('/delete_comments<int:comment_id>', methods=['POST'])
+@bp.route('/delete_comment<int:comment_id>', methods=['POST'])
 @user_prev_admin
 def delete_comments(comment_id):
     db = get_db()
@@ -164,7 +170,7 @@ def delete_comments(comment_id):
     db.execute('''
         DELETE FROM release_comment WHERE comment_id = ?
     ''', (comment_id,))
-    db.execute()
+    db.commit()
     db.execute('''
         DELETE FROM com_post WHERE comment_id = ?
     ''', (comment_id,))
@@ -180,9 +186,10 @@ def delete_comments(comment_id):
 def get_applies():
     db = get_db()
     applies = db.execute('''
-        SELECT *
+        SELECT a.*, u.username, ua.created_at
         FROM Apply a
         JOIN user_apply ua ON ua.apply_id = a.apply_id
+        JOIN user u ON u.user_id = ua.user_id
     ''').fetchall()
     apply_list = [dict(apply) for apply in applies]
     return jsonify(apply_list)
@@ -203,7 +210,7 @@ def accept_apply(apply_id):
     forum_name = request.get_json().get('forum_name')
     description = request.get_json().get('description')
     db.execute('''
-        INSERT INTO Forum (forum_name, description) VALUE (?,?)
+        INSERT INTO Forum (forum_name, description) VALUES (?,?)
     ''', (forum_name, description, ))
     db.commit()
     db.execute('''
@@ -248,7 +255,40 @@ def delete_user(user_id):
     db.execute('''
         DELETE FROM USER WHERE user_id = ? 
     ''', (user_id, ))
+    db.commit()
     return jsonify({
         'success': True,
         'message': '删除用户成功'
     })
+
+
+@bp.route('/get_posts', methods=['GET'])
+@user_prev_admin
+def get_posts():
+    db = get_db()
+    posts = db.execute('''
+        SELECT p.*, u.username, f.forum_name, rp.created
+        FROM Post p
+        JOIN release_post rp ON rp.post_id = p.post_id
+        JOIN user u ON u.user_id = rp.post_id
+        JOIN post_forum pf ON pf.post_id = p.post_id
+        JOIN forum f ON f.forum_id = pf.forum_id 
+    ''').fetchall()
+    post_list = [dict(post) for post in posts]
+    return jsonify(post_list)
+
+
+@bp.route('/get_comments', methods=['GET'])
+@user_prev_admin
+def get_comments():
+    db = get_db()
+    comments = db.execute('''
+        SELECT c.*, u.username, p.title, rc.created_at
+        FROM Comment c
+        JOIN release_comment rc ON rc.comment_id = c.comment_id
+        JOIN user u ON u.user_id = rc.comment_id
+        JOIN com_post cp ON cp.comment_id = c.comment_id
+        JOIN post p ON p.post_id = cp.post_id 
+    ''').fetchall()
+    comment_list = [dict(comment) for comment in comments]
+    return jsonify(comment_list)
