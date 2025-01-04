@@ -76,7 +76,7 @@ def get_reports():
 def accept_report(report_id):
     db = get_db()
     report_post = db.execute('''
-        SELECT *
+        SELECT post_id
         FROM report_post rp
         WHERE rp.report_id = ?
     ''', (report_id, )).fetchone()
@@ -92,13 +92,13 @@ def accept_report(report_id):
             'message': '审批举报帖子成功，删除帖子成功'
         })
     report_comment = db.execute('''
-            SELECT *
+            SELECT comment_id
             FROM report_comment rc
             WHERE rc.report_id = ?
         ''', (report_id,)).fetchone()
     if report_comment is not None:
         comment_id = report_comment[0]
-        safe_delete_post(comment_id)
+        delete_comments(comment_id)
         db.execute('''
             UPDATE Report SET report_status = 1 WHERE report_id = ?
         ''', (report_id, ))
@@ -161,6 +161,7 @@ def delete_post(post_id):
 @bp.route('/delete_comment<int:comment_id>', methods=['POST'])
 @user_prev_admin
 def delete_comments(comment_id):
+    print(comment_id)
     db = get_db()
     db.execute('''
                 DELETE FROM Comment WHERE comment_id = ? 
@@ -173,6 +174,10 @@ def delete_comments(comment_id):
     db.execute('''
         DELETE FROM com_post WHERE comment_id = ?
     ''', (comment_id,))
+    db.commit()
+    db.execute('''
+            DELETE FROM parent WHERE parent_comment_id = ?
+        ''', (comment_id,))
     db.commit()
     return jsonify({
         "success": True,

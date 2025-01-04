@@ -60,7 +60,7 @@
                             comment_info.find(c => c.comment_id === comment.parent_comment_id).body }}
                     </div>
                     <span style="cursor: pointer;font-weight:bold; color: red;" v-if="comment.parent_comment_id"
-                        @click="goToUserDetail(comment.user_id)">
+                        @click="goToUserDetail(comment_info.find(c => c.comment_id === comment.parent_comment_id).user_id)">
                         {{ "@" + comment_info.find(c => c.comment_id === comment.parent_comment_id).nickname }}
                     </span>
                     {{ comment.body }}<br>
@@ -132,8 +132,8 @@ export default {
                 comment_info.value = response.data.comment;
                 post_info.value.created = Timetrans(post_info.value.created);
                 post_info.value.updated = Timetrans(post_info.value.updated);
-                const response2 = await axios.get("/auth/profile");
-                yourid.value = response2.data.user.user_id;
+                const response2 = await axios.get("/get_logged_user");
+                yourid.value = response2.data.user_id;
             } catch (error) {
                 console.error("获取数据失败：", error);
             }
@@ -142,7 +142,7 @@ export default {
             String(post_info.value.body).split("\n").filter((p) => p.trim())
         );
         const goToUserDetail = (UserId) => {
-            router.push({ path: '/user', query: { id: UserId } });
+            router.push(`/profile/user${UserId}`);
         };
 
         const BackToHome = () => {

@@ -353,6 +353,7 @@ INSERT INTO Post (title, body) VALUES
 ('操作系统的最新发展', '操作系统技术的更新换代不断推动计算机技术的发展。');
 
 
+
 INSERT INTO Comment (body) VALUES
 ('这篇文章写得很好，受益匪浅！'),
 ('我有一些不同的看法，能否进一步说明？'),
