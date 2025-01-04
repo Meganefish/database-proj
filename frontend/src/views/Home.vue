@@ -232,8 +232,12 @@ export default {
         };
 
         const goToPostDetail = (postId) => {
+<<<<<<< HEAD
             // router.push("/post/"+postId);
             router.push({ path: '/post', query: { id: postId } })
+=======
+            router.push({path:'/post',query: {id:postId}})
+>>>>>>> 9af3392078b19e44994816e44128d8c063910f85
         };
 
         onMounted(() => {

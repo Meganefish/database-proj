@@ -340,7 +340,7 @@ def click_like_post(post_id):
         ''', (user_id, post_id)).fetchone()
     if not cur_like_post:
         db.execute('''
-                    INSERT INTO like_post (user_id, post_id) VALUE (?,?)
+                    INSERT INTO like_post (user_id, post_id) VALUES (?,?)
                 ''', (user_id, post_id))
         db.commit()
         return jsonify({
