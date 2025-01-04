@@ -46,4 +46,7 @@ def create_app(test_config=None):
     import admin
     app.register_blueprint(admin.bp)
 
+    import job
+    app.register_blueprint(job.bp)
+
     return app
