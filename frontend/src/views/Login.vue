@@ -27,7 +27,6 @@
         <el-form-item label="密码" prop="password">
           <el-input v-model="form.password" placeholder="请输入密码" show-password>
             <template #prefix>
-              <!-- <el-icon><lock /></el-icon> -->
             </template>
           </el-input>
         </el-form-item>

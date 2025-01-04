@@ -25,14 +25,13 @@
 </template>
 
 <script>
-import { ElMenu, ElMenuItem, ElSubmenu } from 'element-plus';
+import { ElMenu, ElMenuItem } from 'element-plus';
 
 export default {
   name: 'AdminSide',
   components: {
     ElMenu,
     ElMenuItem,
-    ElSubmenu
   },
   props: {
     currentComponent: {

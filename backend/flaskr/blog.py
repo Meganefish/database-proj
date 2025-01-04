@@ -1,10 +1,13 @@
 from functools import wraps
 
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for, jsonify
+    Blueprint, flash, g, redirect, render_template, request, url_for, jsonify, current_app
 )
 from werkzeug.exceptions import abort
 import os
+
+from werkzeug.utils import secure_filename
+
 from db import get_db
 
 bp = Blueprint('blog', __name__)  # 无urlprefix，因此用于根目录
@@ -137,7 +140,7 @@ def release_post(forum_id):
             'message': '找不到论坛'
         })
     db.execute('''
-            INSERT INTO Post (title, body) VALUE (?,?)
+            INSERT INTO Post (title, body) VALUES (?,?)
         ''', (title, body,))
     db.commit()
     post_id = db.execute('''SELECT last_insert_rowid()''').fetchone()[0]
@@ -213,25 +216,30 @@ def post(post_id):
     })
 
 
-@bp.route('/post<int:post_id>/release_comment', methods=['POST'])
+@bp.route('/post<int:post_id>/release_comment<int:parent_comment_id>', methods=['POST'])
 @login_checked
-def release_comment(post_id):
+def release_comment(post_id,parent_comment_id):
     db = get_db()
     user_id = g.user['user_id']
     body = request.get_json().get('body')
     db.execute('''
-        INSERT INTO Comment (body) VALUE ?
+        INSERT INTO Comment (body) VALUES (?)
     ''', (body, ))
     db.commit()
     comment_id = db.execute('''SELECT last_insert_rowid()''').fetchone()[0]
     db.execute('''
-        INSERT INTO release_comment (user_id, comment_id) VALUE (?, ?)
+        INSERT INTO release_comment (user_id, comment_id) VALUES (?, ?)
     ''', (user_id, comment_id))
     db.commit()
     db.execute('''
-        INSERT INTO com_post (comment_id, post_id) VALUE (?,?)
+        INSERT INTO com_post (comment_id, post_id) VALUES (?,?)
     ''', (comment_id, post_id))
     db.commit()
+    if parent_comment_id!=0:
+        db.execute("""
+                INSERT INTO parent (comment_id, parent_comment_id) VALUES (?,?) 
+            """, (comment_id, parent_comment_id))
+        db.commit()
     return jsonify({
         'success': True,
         'message': '发布评论成功'
@@ -358,23 +366,23 @@ def click_like_post(post_id):
         })
 
 
-@bp.route('/submit_report_post<int:post_id>', methods=['GET'])
+@bp.route('/submit_report_post<int:post_id>', methods=['POST'])
 @login_checked
 def submit_report_post(post_id):
     reason = request.get_json().get('reason')
     user_id = g.user['user_id']
     db = get_db()
     db.execute('''
-        INSERT INTO Report (reason) VALUE (?)
+        INSERT INTO Report (reason) VALUES (?)
     ''', (reason, ))
     db.commit()
     report_id = db.execute('''SELECT last_insert_rowid()''').fetchone()[0]
     db.execute('''
-        INSERT INTO report_post (report_id, post_id) VALUE (?, ?)
+        INSERT INTO report_post (report_id, post_id) VALUES (?, ?)
     ''', (report_id, post_id))
     db.commit()
     db.execute('''
-        INSERT INTO release_report (user_id, report_id) VALUE (?, ?)
+        INSERT INTO release_report (user_id, report_id) VALUES (?, ?)
     ''', (user_id, report_id))
     db.commit()
     return jsonify({
@@ -383,23 +391,23 @@ def submit_report_post(post_id):
     })
 
 
-@bp.route('/submit_report_comment<int:comment_id>', methods=['GET'])
+@bp.route('/submit_report_comment<int:comment_id>', methods=['POST'])
 @login_checked
 def submit_report_comment(comment_id):
     reason = request.get_json().get('reason')
     user_id = g.user['user_id']
     db = get_db()
     db.execute('''
-        INSERT INTO Report (reason) VALUE (?)
+        INSERT INTO Report (reason) VALUES (?)
     ''', (reason, ))
     db.commit()
     report_id = db.execute('''SELECT last_insert_rowid()''').fetchone()[0]
     db.execute('''
-        INSERT INTO report_comment (report_id, comment_id) VALUE (?, ?)
+        INSERT INTO report_comment (report_id, comment_id) VALUES (?, ?)
     ''', (report_id, comment_id))
     db.commit()
     db.execute('''
-        INSERT INTO release_report (user_id, report_id) VALUE (?, ?)
+        INSERT INTO release_report (user_id, report_id) VALUES (?, ?)
     ''', (user_id, report_id))
     db.commit()
     return jsonify({
@@ -421,9 +429,12 @@ def search_posts():
         })
     try:
         query = """
-        SELECT post_id, title, body 
-        FROM Post 
+        SELECT *
+        FROM release_post rp
+        JOIN post p ON rp.post_id = p.post_id
+        JOIN user u ON u.user_id = rp.user_id
         WHERE title LIKE ?
+        ORDER BY rp.updated DESC
         """
         result = db.execute(query, ('%' + keyword + '%',)).fetchall()
         posts = [dict(post) for post in result]
@@ -453,12 +464,13 @@ def f_search_posts(forum_id):
         })
     try:
         query = """
-        SELECT p.post_id, p.title, p.body 
-        FROM Post p 
-        JOIN post_forum pf ON pf.post_id = p.post_id
-        JOIN forum f ON f.forum_id = pf.forum_id 
+        SELECT *
+        FROM post_forum pf
+        JOIN post p ON pf.post_id = p.post_id
+        JOIN release_post rp ON pf.post_id = rp.post_id
+        JOIN User u ON u.user_id = rp.user_id
         WHERE title LIKE ?
-        AND f.forum_id = ?
+        AND pf.forum_id = ?
         """
         result = db.execute(query, ('%' + keyword + '%', forum_id)).fetchall()
         posts = [dict(post) for post in result]
@@ -480,18 +492,18 @@ def f_search_posts(forum_id):
 @login_checked
 def edit_post(post_id):
     db = get_db()
+    print(request.get_json())
     title = request.get_json().get('title')
     body = request.get_json().get('body')
     images = request.get_json().get('images')
-    user_id = g.user['user_id']
     if not title or not body:
         return jsonify({
             'success': False,
             'message': '标题或内容为空'
         })
     db.execute('''
-            UPDATE User SET (title, body) = (?, ?) WHERE user_id = ?
-        ''', (title, body, user_id, ))
+            UPDATE Post SET (title, body) = (?, ?) WHERE post_id = ?
+        ''', (title, body, post_id, ))
     db.commit()
 
     if not images:
