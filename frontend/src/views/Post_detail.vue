@@ -25,12 +25,15 @@
                 </p>
             </div>
         </el-main>
+        <div class="post-images" v-if="images && images.length">
+            <el-image v-for="(image, index) in images" :key="index" :src="image"
+                style="margin: 10px; width: 150px; height: auto;" lazy />
+        </div>
         <div class="actions">
             <el-button @click="likePost" :type="post_info.like_or_not ? 'primary' : 'default'">
                 <span class="highlight">{{ '🖒' }}</span> ({{ post_info.liked }})
             </el-button>
-            <el-button :type="reportingTo_p ? 'info' : 'warning'"
-                @click="showReportBox_p()">举报</el-button>
+            <el-button :type="reportingTo_p ? 'info' : 'warning'" @click="showReportBox_p()">举报</el-button>
             <el-button v-if="yourid === post_info.user_id" type="success"
                 @click="editPost(post_info.post_id)">编辑</el-button>
             <el-button v-if="yourid === post_info.user_id" type="danger" @click="deletePost">删除</el-button>
@@ -38,8 +41,7 @@
         <!--举报框-->
         <div v-if="reportingTo_p" class="reply_box">
             举报理由：
-            <el-input v-model="reportContent_p" placeholder="感谢你为维护论坛贡献的一份力量"
-                @keyup.enter="submitReport(0)"></el-input>
+            <el-input v-model="reportContent_p" placeholder="感谢你为维护论坛贡献的一份力量" @keyup.enter="submitReport(0)"></el-input>
             <el-button @click="submitReport(0)">提交</el-button>
         </div>
         <hr>
@@ -77,7 +79,8 @@
                             @click="showReportBox_c(comment.comment_id)">举报</el-button>
                         <el-button :type="replyingTo === comment.comment_id ? 'info' : 'success'"
                             @click="showReplyBox(comment.comment_id)">回复</el-button>
-                        <el-button v-if="yourid === comment.user_id" type="danger" @click="deleteComment(comment.comment_id)">删除</el-button>
+                        <el-button v-if="yourid === comment.user_id" type="danger"
+                            @click="deleteComment(comment.comment_id)">删除</el-button>
                     </span>
                 </div>
                 <!-- 回复框 -->
@@ -115,6 +118,7 @@ export default {
         const postId = ref(null);
         const post_info = ref({});
         const comment_info = ref([]);
+        const images = ref([]);
         const newComment = ref('');
         const replyingTo = ref(null);
         const reportingTo_c = ref(null);
@@ -122,19 +126,21 @@ export default {
         const replyContent = ref('');
         const reportContent_c = ref('');
         const reportContent_p = ref('');
-
         const yourid = ref(0); // 当前用户是否是作者
         // 获取帖子详情
         onMounted(async () => {
             postId.value = route.query.id;
             getPostDetails();
-            console.log(post_info.value.updated);
+            console.log(images.value);
         });
         const getPostDetails = async () => {
             try {
                 const response = await axios.get("/post" + postId.value);
                 post_info.value = response.data.post;
                 comment_info.value = response.data.comment;
+                images.value = response.data.image;
+                console.log(images.value);
+                console.log(response.data);
                 post_info.value.created = Timetrans(post_info.value.created);
                 post_info.value.updated = Timetrans(post_info.value.updated);
                 const response2 = await axios.get("/get_logged_user");
@@ -270,9 +276,9 @@ export default {
                 console.error("获取数据失败：", error);
             }
         };
-        const deleteComment = async(commentId) =>{
+        const deleteComment = async (commentId) => {
             try {
-                var tip = "/safe_delete_comment"+commentId;
+                var tip = "/safe_delete_comment" + commentId;
                 axios.post(tip).then((res) => {
                     console.log(res.data.message);
                     if (res.data.success == true) {
@@ -289,9 +295,9 @@ export default {
             }
         }
 
-        const deletePost = async() =>{
+        const deletePost = async () => {
             try {
-                var tip = "/safe_delete_post"+postId.value;
+                var tip = "/safe_delete_post" + postId.value;
                 axios.post(tip).then((res) => {
                     console.log(res.data.message);
                     if (res.data.success == true) {
@@ -334,6 +340,7 @@ export default {
             deleteComment,
             deletePost,
             profileHead,
+            images,
         };
     }
 };
@@ -471,5 +478,16 @@ export default {
     display: flex;
     gap: 10px;
     /* justify-content: center; */
+}
+
+.post-images {
+    margin-top: 20px;
+}
+
+.post-image {
+    display: inline-block;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 </style>
