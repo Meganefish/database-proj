@@ -38,10 +38,11 @@ export default {
 
 <style scoped>
 .profile-head {
+  width: 100%;
   background-image: url('../../assets/img/headline_bg.jpg');
   background-size: cover;
   background-position: center;
-  height: 100px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,8 +50,12 @@ export default {
 }
 
 .left {
-  font-size: 3em;
+  font-size: 1.5em;
   font-weight: bold;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .right {

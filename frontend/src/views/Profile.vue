@@ -72,16 +72,17 @@ export default {
 <style scoped>
 .profile-container {
     display: flex;
-    width: 70%;
-    margin: 0 auto;
-    /* 居中对齐 */
+    width: 100%;
+    margin: 0 auto; /* 居中对齐 */
     flex-direction: column;
     height: 100vh;
 }
 
 .profile-content {
+    width: 60%;
     display: flex;
     flex: 1;
+    margin: 0 auto; /* 居中对齐 */
 }
 
 .profile-body {
