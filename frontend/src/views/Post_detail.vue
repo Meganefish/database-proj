@@ -1,4 +1,6 @@
 <template>
+    <div><profile-head></profile-head></div>
+    <br>
     <div class="post-container">
         <span class="back-button" @click="BackToHome">{{ "↩️返回" }}</span>
         <el-header class="header">
@@ -75,7 +77,7 @@
                             @click="showReportBox_c(comment.comment_id)">举报</el-button>
                         <el-button :type="replyingTo === comment.comment_id ? 'info' : 'success'"
                             @click="showReplyBox(comment.comment_id)">回复</el-button>
-                        <el-button v-if="yourid === comment.user_id" type="danger" @click="deleteComment">删除</el-button>
+                        <el-button v-if="yourid === comment.user_id" type="danger" @click="deleteComment(comment.comment_id)">删除</el-button>
                     </span>
                 </div>
                 <!-- 回复框 -->
@@ -102,9 +104,12 @@ import { useRoute } from 'vue-router';
 import axios from "axios";
 import router from '@/router/Router.js';
 import { ElMessage } from "element-plus";
-
+import profileHead from './profile_box/profile_head.vue'
 export default {
     name: 'DetailPage',
+    components: {
+        profileHead,
+    },
     setup() {
         const route = useRoute();
         const postId = ref(null);
@@ -265,6 +270,43 @@ export default {
                 console.error("获取数据失败：", error);
             }
         };
+        const deleteComment = async(commentId) =>{
+            try {
+                var tip = "/safe_delete_comment"+commentId;
+                axios.post(tip).then((res) => {
+                    console.log(res.data.message);
+                    if (res.data.success == true) {
+                        ElMessage.success({
+                            message: res.data.message, duration: 1200,
+                            onClose: () => {
+                                getPostDetails();
+                            }
+                        });
+                    } else { ElMessage.error(res.data.message); }
+                })
+            } catch (error) {
+                console.error("获取数据失败：", error);
+            }
+        }
+
+        const deletePost = async() =>{
+            try {
+                var tip = "/safe_delete_post"+postId.value;
+                axios.post(tip).then((res) => {
+                    console.log(res.data.message);
+                    if (res.data.success == true) {
+                        ElMessage.success({
+                            message: res.data.message, duration: 1200,
+                            onClose: () => {
+                                router.push({ path: '/home' });
+                            }
+                        });
+                    } else { ElMessage.error(res.data.message); }
+                })
+            } catch (error) {
+                console.error("获取数据失败：", error);
+            }
+        }
 
         return {
             post_info,
@@ -289,6 +331,9 @@ export default {
             reportingTo_p,
             reportContent_c,
             reportContent_p,
+            deleteComment,
+            deletePost,
+            profileHead,
         };
     }
 };

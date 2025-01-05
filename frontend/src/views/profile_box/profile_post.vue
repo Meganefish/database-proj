@@ -3,10 +3,9 @@
     <strong>发帖记录</strong>
     <el-table :data="paginatedData" style="width: 100%">
       <el-table-column prop="post_id" label="post_ID" width="80"></el-table-column>
-      <el-table-column prop="title" label="帖子标题" width="180"></el-table-column>
-      <el-table-column prop="body" label="帖子内容" width="250">
+      <el-table-column prop="title" label="帖子标题" width="150"></el-table-column>
+      <el-table-column prop="body" label="帖子内容" width="180">
         <template v-slot="scope">
-          <!-- 通过计算显示帖子内容，限制为20个字，超过则显示... -->
           <span>{{ formatPostBody(scope.row.body) }}</span>
         </template>
       </el-table-column>
@@ -86,8 +85,8 @@ export default {
   },
   methods: {
     formatPostBody(body) {
-      if (body.length > 30) {
-        return body.slice(0, 30) + '...';
+      if (body.length > 20) {
+        return body.slice(0, 20) + '...';
       }
       return body;
     },

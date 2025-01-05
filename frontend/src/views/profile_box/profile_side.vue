@@ -1,6 +1,6 @@
 <template>
   <div class="profile-side">
-    <div class="return-to-home" @click="BackToHome"><strong>{{ '<返回主页' }}</strong>
+    <div class="return-to-home" @click="BackToHome"><strong>{{ '↩️返回主页' }}</strong>
     </div>
     <el-menu class="el-menu-vertical-demo" @select="handleSelect" :default-active="currentComponentIndex">
       <el-menu-item index="1">个人信息</el-menu-item>

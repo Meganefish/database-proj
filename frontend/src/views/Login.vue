@@ -18,7 +18,6 @@
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" placeholder="请输入用户名">
             <template #prefix>
-              <!-- <el-icon><user /></el-icon> -->
             </template>
           </el-input>
         </el-form-item>
@@ -30,24 +29,6 @@
             </template>
           </el-input>
         </el-form-item>
-
-        <!-- 验证码 -->
-        <!-- <el-form-item label="验证码" prop="captcha">
-          <el-row>
-            <el-col :span="14">
-              <el-input v-model="form.captcha" placeholder="请输入验证码" />
-            </el-col>
-            <el-col :span="10" class="captcha-img-container">
-              <img
-                :src="captchaSrc"
-                @click="refreshCaptcha"
-                alt="captcha"
-                title="点击刷新验证码"
-              />
-            </el-col>
-          </el-row>
-        </el-form-item> -->
-
         <!-- 登录和注册按钮 -->
         <el-form-item>
           <el-row :gutter="0">
@@ -72,14 +53,9 @@
 import { reactive } from "vue";
 import axios from "axios";
 import { ElMessage } from "element-plus";
-// import { User, Lock } from "@element-plus/icons-vue";
 
 export default {
   name: "Login-Form",
-  // components: {
-  //   user: User,
-  //   lock: Lock,
-  // },
   setup() {
     const form = reactive({
       userType: "user", // 登录类型
@@ -90,18 +66,8 @@ export default {
     const rules = {
       username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
       password: [{ required: true, message: "请输入密码", trigger: "blur" }],
-      // captcha: [{ required: true, message: "请输入验证码", trigger: "blur" }],
     };
-
-    // const loading = ref(false);
-    // const captchaSrc = ref("/api/captcha"); // 验证码图片地址
-
-    // const refreshCaptcha = () => {
-    //   captchaSrc.value = `/api/captcha?${new Date().getTime()}`;
-    // };
-
     const handleLogin = () => {   // 表单验证
-      // const loginForm = ref("loginForm");
       try {
         if (form.userType == "admin") {
           axios.post("/auth/admin_login", form).then((res) => {
@@ -115,13 +81,11 @@ export default {
               });
             } else {
               ElMessage.error(res.data.message || "登录失败");
-              // refreshCaptcha();
             }
           })
         }
         else {
           axios.post("/auth/login", form).then((res) => {
-            // loading.value = true;
             console.log(res.data.message);
             if (res.data.success == true) {
               ElMessage.success({
@@ -133,14 +97,11 @@ export default {
               });
             } else {
               ElMessage.error(res.data.message || "登录失败");
-              // refreshCaptcha();
             }
           })
         }
       } catch (error) {
-        // loading.value = false;
         ElMessage.error(error.message || "请求出错");
-        // refreshCaptcha();
       }
     };
     const handleRegister = () => {
@@ -155,9 +116,6 @@ export default {
     return {
       form,
       rules,
-      // loading,
-      // captchaSrc,
-      // refreshCaptcha,
       handleLogin,
       handleRegister,
     };

@@ -320,7 +320,7 @@ def click_like(comment_id):
         ''', (user_id, comment_id)).fetchone()
     if not cur_like_comment:
         db.execute('''
-                    INSERT INTO like_comment (user_id, comment_id) VALUE (?,?)
+                    INSERT INTO like_comment (user_id, comment_id) VALUES (?,?)
                 ''', (user_id, comment_id))
         db.commit()
         return jsonify({
@@ -639,7 +639,7 @@ def safe_delete_post(post_id):
 @bp.route('/forum<int:forum_id>/get_moderator', methods=['GET'])
 def get_moderator(forum_id):
     db = get_db()
-    moderator = db.get('''
+    moderator = db.execute('''
         SELECT u.username, u.nickname, u.user_id
         FROM User u
         JOIN manage_forum mf ON mf.user_id = u.user_id
