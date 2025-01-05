@@ -79,19 +79,15 @@ export default {
             }
         };
         const handleImageUpload = async (file) => {
-            // 将文件读取为 Base64 编码
             const reader = new FileReader();
             reader.onload = (e) => {
                 const base64 = e.target.result;
                 previewImages.value.push(base64);
-                // form.images.push(base64); // 保存到表单数据中
             };
             reader.readAsDataURL(file.raw);
         };
         const removeImage = (index) => {
-            // 删除预览和 Base64 数据
             previewImages.value.splice(index, 1);
-            // form.images.splice(index, 1);
         };
         // 提交表单
         const handleSubmit = async () => {
