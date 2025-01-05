@@ -8,16 +8,6 @@
         </el-header>
         <!-- 操作栏 -->
         <el-header class="action-bar">
-            <el-select v-model="selectedBlockId" placeholder="请选择版块" class="block-selector" @change="handleBlockChange">
-                <el-option label="总版块" :value="null" />
-                <el-option v-for="block in forumBlocks" :key="block.forum_id" :label="block.forum_name"
-                    :value="block.forum_id" />
-            </el-select>
-            <el-input class="action-search" placeholder="搜索帖子或内容" v-model="searchQuery" clearable
-                @keyup.enter="Search" />
-            <el-button type="default" @click="Search()">🔍搜索</el-button>
-            <el-button type="primary" @click="goToRoute('/post_edit')">发布帖子</el-button>
-            <el-button type="primary" @click="submitApply()">申请版块</el-button>
             <el-dropdown trigger="click">
                 <span class="avatar-dropdown">
                     <el-avatar src="person.ico" />
@@ -29,6 +19,17 @@
                     </el-dropdown-menu>
                 </template>
             </el-dropdown>
+            <el-button type="warning" @click="goToRoute('/post_edit')">发布帖子</el-button>
+            <el-button type="info" @click="submitApply()">申请版块</el-button>
+            <el-button type="success" @click="goToRoute('/job')">智慧实习</el-button>
+            <el-select v-model="selectedBlockId" placeholder="请选择版块" class="block-selector" @change="handleBlockChange">
+                <el-option label="总版块" :value="null" />
+                <el-option v-for="block in forumBlocks" :key="block.forum_id" :label="block.forum_name"
+                    :value="block.forum_id" />
+            </el-select>
+            <el-input class="action-search" placeholder="搜索帖子或内容" v-model="searchQuery" clearable
+                @keyup.enter="Search" />
+            <el-button type="default" round @click="Search()">🔍</el-button>                        
         </el-header>
         <!-- 主体布局 -->
         <el-container class="main-content">
@@ -80,6 +81,7 @@ import { ElMessageBox, ElMessage } from "element-plus";
 
 export default {
     name: "Home_Page",
+    
     setup() {
         const searchQuery = ref("");
         const forumBlocks = ref([]);
@@ -198,6 +200,7 @@ export default {
             }
         };
         const Search = async () => {
+            if(!searchQuery.value){return;}
             try {
                 var tip = "/search_posts?keyword=";
                 if (selectedBlockId.value == null) {
@@ -294,10 +297,12 @@ export default {
 
 <style scoped>
 .home-container {
-    width: 75%;
-    margin: 0 auto;
+    width: 100%;
     display: flex;
     flex-direction: column;
+    /* align-items: center;  */
+    justify-content: center; /* 垂直居中 */
+    margin: 0 auto;
     background-color: #f5f5f5;
 }
 
@@ -305,7 +310,7 @@ export default {
     background-image: url('../assets/img/headline_bg.jpg');
     background-size: cover;
     background-position: center;
-    height: 100px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -313,8 +318,11 @@ export default {
 }
 
 .header-title {
-    font-size: 3em;
+    font-size: 1.5em;
     font-weight: bold;
+    display:flex;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .action-bar {
@@ -326,12 +334,13 @@ export default {
 }
 
 .block-selector {
+    margin: 0 20px;
     width: 200px;
 }
 
 .action-search {
     flex: 1;
-    margin: 0 20px;
+    margin: 0 5px;
 }
 
 .avatar-dropdown {
@@ -340,7 +349,13 @@ export default {
 }
 
 .main-content {
-    padding: 20px;
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    /* flex-direction: column; 垂直排列 */
+    padding: 20px 10px;
 }
 
 .content {
@@ -348,6 +363,7 @@ export default {
 }
 
 .post-card {
+    justify-content: center;
     margin-bottom: 20px;
 }
 

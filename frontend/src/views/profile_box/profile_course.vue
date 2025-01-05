@@ -6,7 +6,7 @@
             <el-table-column prop="course_name" label="课程名称" width="150"></el-table-column>
             <el-table-column prop="dept" label="院系" width="150"></el-table-column>
             <el-table-column prop="teacher_name" label="任课教师" width="120"></el-table-column>
-            <el-table-column prop="created_at" label="创建时间" width="240"></el-table-column>
+            <el-table-column prop="created_at" label="选课时间" width="240"></el-table-column>
         </el-table>
 
         <!-- 分页部分 -->
