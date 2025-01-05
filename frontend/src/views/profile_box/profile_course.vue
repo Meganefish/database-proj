@@ -91,6 +91,7 @@ export default {
 
 <style scoped>
 .profile-courses {
+    width: 75%;
     padding: 20px;
 }
 

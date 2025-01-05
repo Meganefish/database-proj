@@ -79,7 +79,7 @@ export default {
 }
 
 .profile-content {
-    width: 60%;
+    width: 80%;
     display: flex;
     flex: 1;
     margin: 0 auto; /* 居中对齐 */
