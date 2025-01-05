@@ -1,79 +1,119 @@
 <template>
-  <div class="container">
-    <!-- 左侧：招聘信息列表 -->
-    <div class="left">
-      <h1>招聘信息列表</h1>
-      <div id="job-list">
-        <div v-for="job in jobs" :key="job.id" class="job-container">
-          <a :href="job.job_card_link" target="_blank">
-            <div>
-              <span class="job-title">{{ job.title }}</span>
-              <span class="salary">({{ job.salary_min }}-{{ job.salary_max }}元/天)</span>
+  <div class="profile-container">
+    <profile-head></profile-head>
+    <div class="container">      
+      <div class="main">
+        <div class="return-to-home" @click="BackToHome"><strong>{{ '↩️返回主页' }}</strong></div>
+        <div class="up">
+          <div class="keyword-filter">
+            <h3>选择关键词筛选：</h3>
+            <form @submit.prevent="filterJobs">
+              <div class="keywords-container">
+                <label v-for="(keyword, index) in all_keywords" :key="index" class="keyword-label">
+                  <input type="checkbox" :value="keyword" v-model="selected_keywords" class="keyword-checkbox" />
+                  <span class="keyword-text">{{ keyword }}</span>
+                </label>
+              </div>
+              <!-- 筛选按钮 -->
+              <button type="submit" class="filter-button">筛选</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="down">
+          <h1>招聘信息列表</h1>
+          <div id="job-list">
+            <div v-for="job in paginatedJobs" :key="job.id" class="job-container">
+              <a :href="job.job_card_link" target="_blank">
+                <div class="job-header">
+                  <span class="job-title">{{ job.title }}</span>
+                  <span class="salary">({{ job.salary_min }}-{{ job.salary_max }}元/天)</span>
+                </div>
+                <div class="job-keywords">
+                  <span v-for="(keyword, index) in job.key_words" :key="index" class="keyword">
+                    {{ keyword }}
+                  </span>
+                </div>
+                <div class="job-detail">
+                  <span class="job-label">通勤时间:</span> {{ job.duration_hours_minutes }}
+                  <span class="job-label">通勤费用:</span> {{ job.cost }}元
+                </div>
+                <div class="job-detail">
+                  <span class="job-label">到岗要求:</span> {{ job.internship_days }} 天/周 {{ job.internship_months }} 个月
+                </div>
+                <div class="job-detail">
+                  <span class="job-label">地址:</span> {{ job.address }}
+                </div>
+              </a>
             </div>
-            <div class="job-keywords">
-              <span v-for="(keyword, index) in job.key_words" :key="index" class="keyword">
-                {{ keyword }}
-              </span>
-            </div>
-            <div class="job-detail">
-              <span class="job-label">通勤时间:</span> {{ job.duration_hours_minutes }}
-              <span class="job-label">通勤费用:</span> {{ job.cost }}元
-            </div>
-            <div class="job-detail">
-              <span class="job-label">到岗要求:</span> {{ job.internship_days }} 天/周 {{ job.internship_months }} 个月
-            </div>
-            <div class="job-detail">
-              <span class="job-label">地址:</span> {{ job.address }}
-            </div>
-          </a>
+          </div>
+
+          <!-- 分页控件 -->
+          <div class="pagination">
+            <button
+              :disabled="currentPage === 1"
+              @click="changePage(currentPage - 1)"
+              class="pagination-button"
+            >
+              上一页
+            </button>
+            <span class="page-number">{{ currentPage }} / {{ Math.ceil(totalJobs / pageSize) }}</span>
+            <button
+              :disabled="currentPage === Math.ceil(totalJobs / pageSize)"
+              @click="changePage(currentPage + 1)"
+              class="pagination-button"
+            >
+              下一页
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 右侧：图表 -->
-    <div class="right">
-      <div class="keyword-filter">
-        <h3>选择关键词筛选：</h3>
-        <form @submit.prevent="filterJobs">
-          <div class="keywords-container">
-            <label v-for="(keyword, index) in all_keywords" :key="index" class="keyword-label">
-              <input type="checkbox" :value="keyword" v-model="selected_keywords" class="keyword-checkbox" />
-              <span class="keyword-text">{{ keyword }}</span>
-            </label>
-          </div>
-          <!-- 筛选按钮 -->
-          <button type="submit" class="filter-button">筛选</button>
-        </form>
+      <div class="side">
+        <h1>关键词频率分析</h1>
+        <div class="chart-container" id="pie-chart"></div>
+        <div class="chart-container" id="bar-chart"></div>
+        <h1>关键词对应的平均薪资</h1>
+        <div class="chart-container" id="salary-bar-chart"></div>
       </div>
-      <h1>关键词频率分析</h1>
-      <div class="chart-container" id="pie-chart"></div>
-      <div class="chart-container" id="bar-chart"></div>
-      <h1>关键词对应的平均薪资</h1>
-      <div class="chart-container" id="salary-bar-chart"></div>
     </div>
   </div>
 </template>
 
 <script>
+import profileHead from './profile_box/profile_head.vue'
 import axios from 'axios';
-import * as echarts from 'echarts'; // 引入 ECharts
+import * as echarts from 'echarts';
+import router from '@/router/Router.js';
 
 export default {
+  name: 'JobComponent',
+  components: {
+    profileHead,
+  },
   data() {
     return {
-      jobs: [],
+      jobs: [], // 所有的招聘信息
       all_keywords: [],
       selected_keywords: [],
-      pie_html: '', // 饼图 HTML（暂不使用）
-      bar_html: '', // 频率柱状图的 HTML（废弃，改用 JSON 数据渲染）
-      salary_bar_html: '', // 平均薪资柱状图的 HTML（废弃，改用 JSON 数据渲染）
-      pieChart: null, // 存储频率玫瑰饼图实例
-      barChart: null, // 存储频率柱状图实例
-      salaryBarChart: null, // 存储平均薪资柱状图实例
+      currentPage: 1, // 当前页码
+      pageSize: 5, // 每页显示的招聘信息数量
+      totalJobs: 0, // 总招聘信息数量
+      paginatedJobs: [], // 当前页显示的招聘信息
+      pieChart: null,
+      barChart: null,
+      salaryBarChart: null,
     };
   },
+  setup() {
+    const BackToHome = () => {
+      router.push({ path: '/home' });
+    };
+    return {
+      BackToHome,
+    }
+  },
   methods: {
-    // 从后端获取数据
     async fetchData() {
       try {
         const response = await axios.get('/job', {
@@ -81,224 +121,256 @@ export default {
         });
         this.jobs = response.data.jobs;
         this.all_keywords = response.data.all_keywords;
-
-        // 使用后端返回的 JSON 数据渲染图表
-        this.renderPieChart(JSON.parse(response.data.pie_html)); // 渲染关键词频率饼图
-        this.renderBarChart(JSON.parse(response.data.bar_html)); // 渲染关键词频率柱状图
-        this.renderSalaryBarChart(JSON.parse(response.data.salary_bar_html)); // 渲染平均薪资柱状图
+        this.totalJobs = this.jobs.length; // 更新总数据量
+        this.paginateJobs(); // 根据当前页码更新显示的招聘信息
+        this.renderPieChart(JSON.parse(response.data.pie_html));
+        this.renderBarChart(JSON.parse(response.data.bar_html));
+        this.renderSalaryBarChart(JSON.parse(response.data.salary_bar_html));
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     },
 
-    // 渲染关键词频率饼图
-    renderPieChart(pieChartData) {
-      const chartDom = document.getElementById('pie-chart'); // 获取饼图容器
-      if (!this.pieChart) {
-        // 初始化 ECharts 实例
-        this.pieChart = echarts.init(chartDom);
-      }
-      this.pieChart.setOption(pieChartData); // 设置图表数据
+    // 根据当前页码获取当前页的招聘信息
+    paginateJobs() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      this.paginatedJobs = this.jobs.slice(start, end); // 获取当前页的招聘信息
     },
 
-    // 渲染关键词频率柱状图
-    renderBarChart(barChartData) {
-      const chartDom = document.getElementById('bar-chart'); // 获取柱状图容器
-      if (!this.barChart) {
-        // 初始化 ECharts 实例
-        this.barChart = echarts.init(chartDom);
-      }
-      this.barChart.setOption(barChartData); // 设置图表数据
+    // 改变页码时重新加载数据
+    changePage(pageNumber) {
+      this.currentPage = pageNumber;
+      this.paginateJobs();
     },
 
-    // 渲染关键词平均薪资柱状图
-    renderSalaryBarChart(salaryBarChartData) {
-      const chartDom = document.getElementById('salary-bar-chart'); // 获取柱状图容器
-      if (!this.salaryBarChart) {
-        // 初始化 ECharts 实例
-        this.salaryBarChart = echarts.init(chartDom);
-      }
-      this.salaryBarChart.setOption(salaryBarChartData); // 设置图表数据
-    },
-
-    // 点击筛选按钮时重新加载数据和渲染图表
     filterJobs() {
       this.fetchData();
     },
+
+    renderPieChart(pieChartData) {
+      const chartDom = document.getElementById('pie-chart');
+      if (!this.pieChart) {
+        this.pieChart = echarts.init(chartDom);
+      }
+      this.pieChart.setOption(pieChartData);
+    },
+
+    renderBarChart(barChartData) {
+      const chartDom = document.getElementById('bar-chart');
+      if (!this.barChart) {
+        this.barChart = echarts.init(chartDom);
+      }
+      this.barChart.setOption(barChartData);
+    },
+
+    renderSalaryBarChart(salaryBarChartData) {
+      const chartDom = document.getElementById('salary-bar-chart');
+      if (!this.salaryBarChart) {
+        this.salaryBarChart = echarts.init(chartDom);
+      }
+      this.salaryBarChart.setOption(salaryBarChartData);
+    },
   },
   mounted() {
-    this.fetchData(); // 初次加载数据
+    this.fetchData();
   },
 };
 </script>
 
-
 <style scoped>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: row;
-    height: 100vh; /* 页面高度固定为视窗高度 */
-  }
+.profile-container {
+  display: flex;
+  width: 100%;
+  margin: 0 auto;
+  flex-direction: column;
+  height: 100vh;
+}
 
-  .container {
-    display: flex;
-    flex: 1;
-    overflow: hidden; /* 防止页面整体滚动 */
-  }
+.container {
+  width: 80%;
+  margin: 0 auto;
+  display: flex;
+  flex: 1;
+  padding: 15px;
+}
 
-  .left, .right {
-    height: 100%; /* 区域高度占满页面 */
-    overflow-y: auto; /* 启用垂直滚动 */
-    padding: 20px;
-  }
+.main {
+  flex: 7;
+  display: flex;
+  flex-direction: column;
+  margin-right: 60px;
+}
 
-  .left {
-    flex: 5; /* 左侧宽度比例 */
-    background-color: #f9f9f9;
-  }
+.side {
+  flex: 3;
+}
 
-  .right {
-    flex: 5; /* 右侧宽度比例 */
-    background-color: #fff;
-    border-left: 2px solid #ccc;
-  }
+.up {
+  margin-bottom: 10px;
+}
 
-  .job-container {
-    border: 2px solid #ccc;
-    border-radius: 10px;
-    background: #fff;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px; /* 增大内边距 */
-    margin-bottom: 20px; /* 增大间距 */
-  }
+.down {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
 
-  .job-title {
-    font-size: 1.6em; /* 增大标题字体 */
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-size: 14px; /* 全局字体大小调整 */
+}
 
-  .salary {
-    color: #e7643c;
-    font-weight: bold;
-    font-size: 1.4em; /* 增大薪资字体 */
-  }
+.job-container {
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-  .job-keywords {
-    font-size: 1.1em; /* 关键词字体加大 */
-    color: #757373;
-    margin-bottom: 15px;
-  }
+.job-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
 
-  .keyword {
-    background-color: #e1f0f6; /* 浅灰色背景 */
-    padding: 6px 12px; /* 内边距 */
-    margin-right: 10px; /* 关键词之间的间距 */
-    border-radius: 5px; /* 圆角 */
-    display: inline-block; /* 使关键词在同一行显示 */
-    font-size: 15px; /* 字体大小 */
-  }
+.job-title {
+  font-size: 1.4em;  
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+}
 
-  .job-detail {
-    margin-top: 12px;
-    font-size: 1.1em;
-    color: #333;
-  }
+.salary {
+  color: #e7643c;
+  font-weight: 600;
+  font-size: 1.2em;  
+}
 
-  .job-detail span.job-label {
-    font-weight: bold;
-    color: #333;
-  }
+.job-keywords {
+  font-size: 1em;  
+  color: #757373;
+  margin-bottom: 12px;
+  margin-top: 12px;
+}
 
-  .chart-container {
-    width: 100%; /* 图表宽度自适应 */
-    height: 450px; /* 图表高度固定 */
-    margin-bottom: 28px; /* 增大图表间距 */
-    padding: 15px;
-    border: 1px solid #ddd;
-    background-color: #fafafa;
-    overflow: visible; /* 确保文字显示完整 */
-  }
+.keyword {
+  background-color: #e1f0f6;
+  padding: 6px 10px;
+  margin-right: 8px;
+  border-radius: 5px;
+  font-size: 13px;  
+}
 
-  .keyword-filter {
-    width: 100%;
-    margin-bottom: 25px;
-  }
+.job-detail {
+  margin-top: 10px;
+  font-size: 1em;  
+  color: #555;
+}
 
-  .keywords-container {
-    display: flex;
-    flex-wrap: wrap; /* 自动换行 */
-    gap: 1px; /* 每个复选框之间的间隔 */
-  }
+.job-label {
+  font-weight: bold;
+  color: #333;
+}
 
-  .keywords-container label {
-    width: calc(25% - 10px); /* 每行最多显示 4 个关键词，减去间隔 */
-    margin-bottom: 10px;
-    font-size: 15px;
-  }
+.chart-container {
+  width: 100%;
+  height: 350px; /* 适当调整高度 */
+  gap: 15px;
+  margin-bottom: 25px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  background-color: #fafafa;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
 
-  a {
-    color: #000000;
-    text-decoration: none;
-  }
-  .keyword-filter {
-    margin-bottom: 30px;
-    padding: 20px;
-    background-color: #f7f7f7;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
+.keyword-filter {
+  width: 100%;
+  padding: 18px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
-  h3 {
-    font-size: 1.6em;
-    margin-bottom: 15px;
-    font-weight: bold;
-    color: #333;
-  }
+.keywords-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
-  .keywords-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
+.keyword-label {
+  display: flex;
+  align-items: center;
+}
 
-  .keyword-label {
-    display: flex;
-    align-items: center;
-    font-size: 1.1em;
-    color: #555;
-  }
+.keyword-checkbox {
+  margin-right: 6px;
+}
 
-  .keyword-checkbox {
-    margin-right: 8px;
-    accent-color: #4CAF50; /* 使用绿色作为复选框的颜色 */
-  }
+.filter-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px 12px;
+  font-size: 1em;  
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
 
-  .keyword-text {
-    font-size: 1.1em;
-  }
+.filter-button:hover {
+  background-color: #45a049;
+}
 
-  .filter-button {
-    background-color: #4CAF50;
-    color: white;
-    font-size: 1.2em;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+}
 
-  .filter-button:hover {
-    background-color: #45a049;
-  }
+.pagination-button {
+  background-color: #4CAF50;
+  color: white;
+  font-size: 1em;  
+  padding: 6px 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 0 8px;
+}
 
-  .filter-button:active {
-    background-color: #388e3c;
-  }
-  
+.pagination-button:hover {
+  background-color: #45a049;
+}
+
+.pagination-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.page-number {
+  font-size: 1em;
+  font-weight: bold;
+  color: #555;
+}
+a {
+  color: inherit;
+  text-decoration: none; /* 去掉下划线 */
+}
+
+.return-to-home {
+  font-size: 16px;
+  padding: 10px;
+  cursor: pointer;
+}
 </style>
