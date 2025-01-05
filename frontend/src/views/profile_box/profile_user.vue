@@ -157,15 +157,15 @@ export default {
                     <div>
                         <div>
                         <label for="old_password">旧密码:&nbsp;&nbsp;</label>
-                        <input id="old_password" placeholder="请输入旧密码"></input>
+                        <input id="old_password" type="password" placeholder="请输入旧密码"></input>
                         </div>
                         <div>
                         <label for="new_password">新密码:&nbsp;&nbsp;</label>
-                        <input id="new_password" placeholder="请输入新密码"></input>
+                        <input id="new_password" type="password" placeholder="请输入新密码"></input>
                         </div>
                         <div>
                         <label for="new_password_again">重复新密码:</label>
-                        <input id="new_password_again" placeholder="请再次输入新密码"></input>
+                        <input id="new_password_again" type="password" placeholder="请再次输入新密码"></input>
                         </div>
                     </div>
                 `,
