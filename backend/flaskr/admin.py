@@ -322,7 +322,7 @@ def get_forums():
         SELECT f.*, u.username, u.nickname, u.user_id
         FROM Forum f
         JOIN manage_forum mf ON mf.forum_id = f.forum_id
-        JOIN User u ON u.user_id = mf.forum_id 
+        JOIN User u ON u.user_id = mf.user_id 
     ''').fetchall()
     forum_list = [dict(forum) for forum in forums]
     return jsonify(forum_list)
