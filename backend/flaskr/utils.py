@@ -14,7 +14,7 @@ def generate_bar_chart_html(labels, counts):
             xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=45)),
         )
     )
-    return bar.render_embed()
+    return bar.dump_options_with_quotes()  # 导出为 JSON 字符串    #render_embed()
 
 # 用于生成关键词平均薪资柱状图 HTML
 def generate_salary_bar_chart_html(keywords, avg_salaries):
@@ -37,7 +37,7 @@ def generate_salary_bar_chart_html(keywords, avg_salaries):
             label_opts=opts.LabelOpts(is_show=True, position="top", font_size=14, color="#333333")  # 显示数据标签，顶部显示，字体设置为清晰的颜色
         )
     )
-    return bar.render_embed()
+    return bar.dump_options_with_quotes()  # 导出为 JSON 字符串 #render_embed()
 
 
 # 用于生成饼图 HTML
@@ -59,4 +59,4 @@ def generate_pie_chart_html(labels, counts):
         )
         .set_series_opts(label_opts=opts.LabelOpts(is_show=True, formatter="{b}: {c}"))
     )
-    return pie.render_embed()
+    return pie.dump_options_with_quotes()  # 导出为 JSON 字符串 #render_embed()

@@ -69,7 +69,7 @@ const router = createRouter({
       meta: {         
             title: '招聘信息页' 
           },
-      component: ()=>import('../views/Job.vue')
+      component: ()=>import('../views/JobComponent.vue')
     },
   ]
 })

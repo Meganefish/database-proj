@@ -1,29 +1,33 @@
 from functools import wraps
-
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for, jsonify
 )
 from werkzeug.exceptions import abort
 import os
+import sqlite3
 from db import get_db
-from .utils import generate_bar_chart_html, generate_pie_chart_html, generate_salary_bar_chart_html
-
+from utils import generate_bar_chart_html, generate_pie_chart_html, generate_salary_bar_chart_html
+import random
+from collections import Counter
 
 bp = Blueprint('job', __name__)  # 无urlprefix，因此用于根目录
 
 # 获取数据库连接
 def get_db_connection():
-    conn = sqlite3.connect('../templates/boss.db')
+    conn = sqlite3.connect('boss.db')
     conn.row_factory = sqlite3.Row  # 为了能够按列名访问数据
     return conn
 
 @bp.route('/job', methods=['GET'])
 def get_jobs():
-    selected_keywords = request.args.getlist('keywords')
+    selected_keywords = request.args.getlist('keywords[]')
+    # print("我在这里")
+    # print(selected_keywords)
     
     # 获取招聘信息
     conn = get_db_connection()
     cursor = conn.cursor()
+    
     cursor.execute("SELECT * FROM job_message_table")
     jobs = cursor.fetchall()
     conn.close()
@@ -33,7 +37,7 @@ def get_jobs():
         filtered_jobs = []
         for job in jobs:
             job_keywords = eval(job['key_words'])
-            if any(keyword in job_keywords for keyword in selected_keywords):
+            if all(keyword in job_keywords for keyword in selected_keywords):
                 filtered_jobs.append(job)
         jobs = filtered_jobs
 
