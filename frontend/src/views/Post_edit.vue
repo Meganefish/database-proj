@@ -10,16 +10,22 @@
         <el-input v-model="postTitle" placeholder="请输入标题" clearable class="input-title"></el-input>
         <el-input v-model="postContent" type="textarea" rows="10" placeholder="请输入正文" clearable
             class="input-content"></el-input>
-        <!-- 图片上传 -->
-        <el-upload class="upload-demo" action="/api/upload" list-type="picture-card" :on-success="handleUploadSuccess"
-            :on-remove="handleRemove" :file-list="fileList" accept="image/*">
-        </el-upload>
-        <div v-if="uploadedImages.length" class="image-preview">
-            <h4>已上传图片：</h4>
-            <div class="image-list">
-                <img v-for="(image, index) in uploadedImages" :key="index" :src="image" />
+        <el-form-item label="上传图片">
+            <el-upload :file-list="fileList" :auto-upload="false" :on-change="handleImageUpload" accept="image/*"
+                list-type="picture">
+                <el-button type="primary">选择图片</el-button>
+            </el-upload>
+            <div v-if="previewImages.length" class="image-preview">
+                <div v-for="(image, index) in previewImages" :key="index" class="image-container">
+                    <el-image :src="image" style="margin: 10px; width: 150px; height: auto;" />
+                    <el-button size="mini" type="danger" icon="el-icon-close" class="delete-button"
+                        @click="removeImage(index)">
+                        删除
+                    </el-button>
+                </div>
             </div>
-        </div>
+        </el-form-item>
+
         <div class="buttons">
             <el-button type="primary" @click="handleSubmit">发布</el-button>
             <el-button type="danger" @click="handleCancel">取消</el-button>
@@ -44,26 +50,14 @@ export default {
         const postContent = ref("");
         const selectedForum = ref(null); // 新建时的论坛选择
         const forums = ref([]);
-        const uploadedImages = ref([]);
-        // const fileList = ref([]); // El-upload 文件列表
+        const fileList = ref([]); // 用于展示已选图片的列表
+        const previewImages = ref([]); // 预览图片的 Base64 数据
         const form = reactive({
             title: "",
             body: "",
             images: [],
         });
-        const handleUploadSuccess = (response) => {
-            if (response.url) {
-                uploadedImages.value.push(response.url); // 假设后端返回图片 URL
-            }
-        };
 
-        // 图片移除处理
-        const handleRemove = (file) => {
-            const index = uploadedImages.value.findIndex((img) => img === file.response.url);
-            if (index !== -1) {
-                uploadedImages.value.splice(index, 1);
-            }
-        };
         const loadForums = async () => {
             try {
                 const { data } = await axios.get("/get_forums");
@@ -78,11 +72,22 @@ export default {
                     const { data } = await axios.get("/post" + postId);
                     postTitle.value = data.post.title;
                     postContent.value = data.post.body;
-                    uploadedImages.value = data.image;
+                    previewImages.value = data.image;
                 } catch (error) {
                     console.error("加载帖子失败", error);
                 }
             }
+        };
+        const handleImageUpload = async (file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64 = e.target.result;
+                previewImages.value.push(base64);
+            };
+            reader.readAsDataURL(file.raw);
+        };
+        const removeImage = (index) => {
+            previewImages.value.splice(index, 1);
         };
         // 提交表单
         const handleSubmit = async () => {
@@ -95,7 +100,7 @@ export default {
             try {
                 form.title = postTitle.value;
                 form.body = postContent.value;
-                form.images = uploadedImages.value;
+                form.images = previewImages.value;
                 if (isEditing.value) {
                     axios.post(`/post${postId}/edit_post`, form).then((res) => {
                         console.log(res.data.message);
@@ -148,9 +153,10 @@ export default {
             handleSubmit,
             handleCancel,
             isEditing,
-            uploadedImages,
-            handleUploadSuccess,
-            handleRemove,
+            fileList,
+            previewImages,
+            handleImageUpload,
+            removeImage
         };
     },
 };
@@ -199,5 +205,25 @@ export default {
 
 .buttons .el-button {
     width: 48%;
+}
+
+.image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+}
+
+.delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
 }
 </style>

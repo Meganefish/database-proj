@@ -25,6 +25,10 @@
                 </p>
             </div>
         </el-main>
+        <div class="post-images" v-if="images && images.length">
+            <el-image v-for="(image, index) in images" :key="index" :src="image"
+                style="margin: 10px; width: 150px; height: auto;" lazy />
+        </div>
         <div class="actions">
             <el-button @click="likePost" :type="post_info.like_or_not ? 'primary' : 'default'">
                 <span class="highlight">{{ '🖒' }}</span> ({{ post_info.liked }})
@@ -114,6 +118,7 @@ export default {
         const postId = ref(null);
         const post_info = ref({});
         const comment_info = ref([]);
+        const images = ref([]);
         const newComment = ref('');
         const replyingTo = ref(null);
         const reportingTo_c = ref(null);
@@ -129,13 +134,16 @@ export default {
         onMounted(async () => {
             postId.value = route.query.id;
             getPostDetails();
-            console.log(post_info.value.updated);
+            console.log(images.value);
         });
         const getPostDetails = async () => {
             try {
                 const response = await axios.get("/post" + postId.value);
                 post_info.value = response.data.post;
                 comment_info.value = response.data.comment;
+                images.value = response.data.image;
+                console.log(images.value);
+                console.log(response.data);
                 post_info.value.created = Timetrans(post_info.value.created);
                 post_info.value.updated = Timetrans(post_info.value.updated);
                 const forumID = post_info.value.forum_id;
@@ -348,6 +356,7 @@ export default {
             deleteComment,
             deletePost,
             profileHead,
+            images,
         };
     }
 };
@@ -485,5 +494,16 @@ export default {
     display: flex;
     gap: 10px;
     /* justify-content: center; */
+}
+
+.post-images {
+    margin-top: 20px;
+}
+
+.post-image {
+    display: inline-block;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 </style>

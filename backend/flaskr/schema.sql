@@ -508,3 +508,18 @@ INSERT INTO like_comment(user_id, comment_id) VALUES
 
 INSERT INTO like_post(user_id, post_id) VALUES
 (1, 1), (1, 2), (3, 4), (5, 6), (6, 12);
+
+INSERT INTO post_images (image_id,image_path,post_id) VALUES
+(1,"uploads\post_images\1_1.png",1),
+(2,"uploads\post_images\1_2.png",1),
+(3,"uploads\post_images\1_3.png",1),
+(4,"uploads\post_images\1_4.png",1),
+(5,"uploads\post_images\2_1.png",2),
+(6,"uploads\post_images\2_2.png",2),
+(7,"uploads\post_images\3_1.png",3),
+(8,"uploads\post_images\3_2.png",3),
+(9,"uploads\post_images\3_3.png",3),
+(10,"uploads\post_images\4_1.png",4),
+(11,"uploads\post_images\4_2.png",4),
+(12,"uploads\post_images\5_1.png",5),
+(13,"uploads\post_images\6_1.png",6);

@@ -1,3 +1,4 @@
+import base64
 from functools import wraps
 
 from flask import (
@@ -105,21 +106,51 @@ def allowed_file(filename):
 
 
 def save_pic_topic(images, post_id, db):
-    # 保存图片并记录路径
-    for image in images[:9]:  # 最多处理 9 张图片
-        if image and allowed_file(image.filename):
-            filename = secure_filename(image.filename)
-            filepath = os.path.join(
-                'uploads', 'post_images', filename)
-            filepath = filepath.replace('\\', '/')
-            image.save(os.path.join(
-                current_app.static_folder, filepath))
+    image_folder = os.path.join(current_app.static_folder, "uploads", "post_images")
+    os.makedirs(image_folder, exist_ok=True)
+    for idx, image_data in enumerate(images):
+        try:
+            header, encoded = image_data.split(",", 1)
+            file_extension = header.split("/")[1].split(";")[0]
+            file_name = f"{post_id}_{idx + 1}.{file_extension}"
+            file_path = os.path.join(image_folder, secure_filename(file_name))
+            with open(file_path, "wb") as f:
+                f.write(base64.b64decode(encoded))
             db.execute(
                 'INSERT INTO post_images (post_id, image_path) VALUES (?, ?)',
-                (post_id, filepath)
+                (post_id, f"uploads/post_images/{file_name}")
             )
+        except Exception as e:
+            print(f"Error saving image: {e}")
+            continue
+
     db.commit()
 
+def update_pic_topic(images, post_id, db):
+    db.execute(
+        'DELETE FROM post_images WHERE post_id = ? ',
+        (post_id,)
+    )
+    db.commit()
+    image_folder = os.path.join(current_app.static_folder, "uploads", "post_images")
+    os.makedirs(image_folder, exist_ok=True)
+    for idx, image_data in enumerate(images):
+        try:
+            header, encoded = image_data.split(",", 1)
+            file_extension = header.split("/")[1].split(";")[0]
+            file_name = f"{post_id}_{idx + 1}.{file_extension}"
+            file_path = os.path.join(image_folder, secure_filename(file_name))
+            with open(file_path, "wb") as f:
+                f.write(base64.b64decode(encoded))
+            db.execute(
+                'INSERT INTO post_images (post_id, image_path) VALUES (?, ?)',
+                (post_id, f"uploads/post_images/{file_name}")
+            )
+        except Exception as e:
+            print(f"Error saving image: {e}")
+            continue
+
+    db.commit()
 
 @bp.route('/forum<int:forum_id>/release_post', methods=['POST'])
 @login_checked
@@ -150,7 +181,7 @@ def release_post(forum_id):
     db.execute('''INSERT INTO release_post (post_id, user_id) 
                       VALUES (?, ?)''', (post_id, user_id))
     db.commit()
-    if not images:
+    if images:
         try:
             save_pic_topic(images, post_id, db)
         except Exception as e:
@@ -195,7 +226,13 @@ def post(post_id):
     ).fetchall()
     post_list = dict(cur_post)
     comment_list = [dict(comment) for comment in comments]
-    image_list = [dict(post_image) for post_image in post_images]
+    # image_list = [dict(post_image) for post_image in images]
+    image_list = []
+    for img in post_images:
+        with open(os.path.join('static', img['image_path']), 'rb') as f:
+            encoded_image = base64.b64encode(f.read()).decode('utf-8')
+            mime_type = "image/png" if img['image_path'].endswith('.png') else "image/jpeg"
+            image_list.append(f"data:{mime_type};base64,{encoded_image}")
     post_like_check = db.execute('''
            SELECT 1
            FROM like_post
@@ -492,7 +529,6 @@ def f_search_posts(forum_id):
 @login_checked
 def edit_post(post_id):
     db = get_db()
-    print(request.get_json())
     title = request.get_json().get('title')
     body = request.get_json().get('body')
     images = request.get_json().get('images')
@@ -506,9 +542,9 @@ def edit_post(post_id):
         ''', (title, body, post_id, ))
     db.commit()
 
-    if not images:
+    if images:
         try:
-            save_pic_topic(images, post_id, db)
+            update_pic_topic(images, post_id, db)
         except Exception as e:
             return jsonify({
                 'success': False,
