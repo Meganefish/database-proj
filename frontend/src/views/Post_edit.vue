@@ -45,7 +45,7 @@ export default {
         const selectedForum = ref(null); // 新建时的论坛选择
         const forums = ref([]);
         const uploadedImages = ref([]);
-        const fileList = ref([]); // El-upload 文件列表
+        // const fileList = ref([]); // El-upload 文件列表
         const form = reactive({
             title: "",
             body: "",

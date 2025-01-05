@@ -19,6 +19,7 @@ import AdminComment from './admin_box/admin_comment.vue'
 import AdminApplyForum from './admin_box/admin_apply_forum.vue'
 import AdminReportPost from './admin_box/admin_report_post.vue'
 import AdminReportComment from './admin_box/admin_report_comment.vue'
+import AdminForum from './admin_box/admin_forum.vue'
 
 export default {
   name: 'AdminDashboard',
@@ -30,7 +31,8 @@ export default {
     AdminComment,
     AdminApplyForum,
     AdminReportPost,
-    AdminReportComment
+    AdminReportComment,
+    AdminForum,
   },
   data() {
     return {
@@ -63,6 +65,9 @@ export default {
           break;
         case '5-2':
           this.currentComponent = 'AdminReportComment';
+          break;
+        case '6':
+          this.currentComponent = 'AdminForum';
           break;
         default:
           this.currentComponent = 'AdminUser';

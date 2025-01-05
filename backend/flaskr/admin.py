@@ -296,3 +296,33 @@ def get_comments():
     ''').fetchall()
     comment_list = [dict(comment) for comment in comments]
     return jsonify(comment_list)
+
+
+@bp.route('/delete_forum<int:forum_id>', methods=['POST'])
+def delete_forum(forum_id):
+    db = get_db()
+    db.execute('''
+        DELETE FROM Forum WHERE forum_id = ?
+    ''', (forum_id, ))
+    db.commit()
+    db.execute('''
+        DELETE FROM post_forum WHERE forum_id = ?
+    ''', (forum_id, ))
+    db.commit()
+    return jsonify({
+        'success': True,
+        'message': '删除板块成功'
+    })
+
+
+@bp.route('/get_forums', methods=['GET'])
+def get_forums():
+    db = get_db()
+    forums = db.execute('''
+        SELECT f.*, u.username, u.nickname, u.user_id
+        FROM Forum f
+        JOIN manage_forum mf ON mf.forum_id = f.forum_id
+        JOIN User u ON u.user_id = mf.forum_id 
+    ''').fetchall()
+    forum_list = [dict(forum) for forum in forums]
+    return jsonify(forum_list)

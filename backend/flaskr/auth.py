@@ -157,12 +157,21 @@ def profile(user_id):
         WHERE t.user_id = ?
     ''', (user_id, ))
     courses_dict = [dict(course) for course in courses]
+    forums = db.execute('''
+        SELECT *
+        FROM Forum f
+        JOIN manage_forum mf ON mf.forum_id = f.forum_id
+        WHERE f.forum_id = ?
+    ''', (user_id, ))
+    forum_list = [dict(forum) for forum in forums]
     return jsonify({
         'user': user_dict,
         'posts': post_dict,
         'comments': comment_dict,
-        'courses': courses_dict
+        'courses': courses_dict,
+        'forums': forum_list
     })
+
 
 @bp.route('/visit_user<int:visit_user_id>', methods=['GET'])
 def visit_user(visit_user_id):

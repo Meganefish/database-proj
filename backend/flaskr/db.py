@@ -7,7 +7,7 @@ from flask.cli import with_appcontext
 # g 是存储多个函数都可能用到的数据的连接，从而不必每次请求时都调用新的连接
 # current_app指向处理请求的Flask应用
 
-# 连接数据库
+# 连接数据库git
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect(
