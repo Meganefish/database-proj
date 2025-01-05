@@ -161,7 +161,7 @@ def profile(user_id):
         SELECT *
         FROM Forum f
         JOIN manage_forum mf ON mf.forum_id = f.forum_id
-        WHERE f.forum_id = ?
+        WHERE mf.user_id = ?
     ''', (user_id, ))
     forum_list = [dict(forum) for forum in forums]
     return jsonify({
