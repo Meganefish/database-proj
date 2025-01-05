@@ -5,7 +5,6 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 from db import get_db
-
 bp = Blueprint('admin', __name__, url_prefix='/admin')  # 无urlprefix，因此用于根目录
 
 
@@ -77,7 +76,7 @@ def get_reports():
 def accept_report(report_id):
     db = get_db()
     report_post = db.execute('''
-        SELECT *
+        SELECT post_id
         FROM report_post rp
         WHERE rp.report_id = ?
     ''', (report_id, )).fetchone()
@@ -93,7 +92,7 @@ def accept_report(report_id):
             'message': '审批举报帖子成功，删除帖子成功'
         })
     report_comment = db.execute('''
-            SELECT *
+            SELECT comment_id
             FROM report_comment rc
             WHERE rc.report_id = ?
         ''', (report_id,)).fetchone()
@@ -162,6 +161,7 @@ def delete_post(post_id):
 @bp.route('/delete_comment<int:comment_id>', methods=['POST'])
 @user_prev_admin
 def delete_comments(comment_id):
+    print(comment_id)
     db = get_db()
     db.execute('''
                 DELETE FROM Comment WHERE comment_id = ? 
@@ -174,6 +174,10 @@ def delete_comments(comment_id):
     db.execute('''
         DELETE FROM com_post WHERE comment_id = ?
     ''', (comment_id,))
+    db.commit()
+    db.execute('''
+            DELETE FROM parent WHERE parent_comment_id = ?
+        ''', (comment_id,))
     db.commit()
     return jsonify({
         "success": True,
@@ -292,3 +296,33 @@ def get_comments():
     ''').fetchall()
     comment_list = [dict(comment) for comment in comments]
     return jsonify(comment_list)
+
+
+@bp.route('/delete_forum<int:forum_id>', methods=['POST'])
+def delete_forum(forum_id):
+    db = get_db()
+    db.execute('''
+        DELETE FROM Forum WHERE forum_id = ?
+    ''', (forum_id, ))
+    db.commit()
+    db.execute('''
+        DELETE FROM post_forum WHERE forum_id = ?
+    ''', (forum_id, ))
+    db.commit()
+    return jsonify({
+        'success': True,
+        'message': '删除板块成功'
+    })
+
+
+@bp.route('/get_forums', methods=['GET'])
+def get_forums():
+    db = get_db()
+    forums = db.execute('''
+        SELECT f.*, u.username, u.nickname, u.user_id
+        FROM Forum f
+        JOIN manage_forum mf ON mf.forum_id = f.forum_id
+        JOIN User u ON u.user_id = mf.forum_id 
+    ''').fetchall()
+    forum_list = [dict(forum) for forum in forums]
+    return jsonify(forum_list)

@@ -129,15 +129,9 @@ def logout():
     })
 
 
-@bp.route('/profile', methods=['GET'])
-def profile():
-    if not g.user:
-        return jsonify({
-            'success': False,
-            'message': '请先登录'
-        })
+@bp.route('/profile<int:user_id>', methods=['GET'])
+def profile(user_id):
     db = get_db()
-    user_id = g.user['user_id']
     user_profile = db.execute('''
         SELECT * FROM User u WHERE u.user_id = ?
     ''', (user_id, )).fetchone()
@@ -149,10 +143,35 @@ def profile():
             WHERE rp.user_id = ?
         ''', (user_id,)).fetchall()
     post_dict = [dict(post) for post in posts]
+    comments = db.execute('''
+                SELECT * 
+                FROM release_comment rc
+                JOIN comment c ON c.comment_id = rc.comment_id
+                WHERE rc.user_id = ?
+            ''', (user_id,)).fetchall()
+    comment_dict = [dict(comment) for comment in comments]
+    courses = db.execute('''
+        SELECT *
+        FROM Course c
+        JOIN take t ON t.course_id = c.course_id
+        WHERE t.user_id = ?
+    ''', (user_id, ))
+    courses_dict = [dict(course) for course in courses]
+    forums = db.execute('''
+        SELECT *
+        FROM Forum f
+        JOIN manage_forum mf ON mf.forum_id = f.forum_id
+        WHERE f.forum_id = ?
+    ''', (user_id, ))
+    forum_list = [dict(forum) for forum in forums]
     return jsonify({
         'user': user_dict,
-        'posts': post_dict
+        'posts': post_dict,
+        'comments': comment_dict,
+        'courses': courses_dict,
+        'forums': forum_list
     })
+
 
 @bp.route('/visit_user<int:visit_user_id>', methods=['GET'])
 def visit_user(visit_user_id):
@@ -202,11 +221,17 @@ def reset_password():
         return jsonify({
             'success': False,
             'message': '设置密码失败，错误的旧密码'
-        }), 400
+        })
+    if old_password == new_password:
+        return jsonify({
+            'success': False,
+            'message': '设置密码失败，新旧密码一致'
+        })
     hashed_password = generate_password_hash(new_password)
     db.execute('''
         UPDATE User SET password = ? WHERE user_id = ?
     ''', (hashed_password, user_id))
+    db.commit()
     return jsonify({
         'success': True,
         'message': '重设密码成功'
@@ -223,9 +248,11 @@ def set_nickname():
     db = get_db()
     user_id = g.user['user_id']
     new_nickname = request.get_json().get('nickname')
+    print(new_nickname)
     db.execute('''
             UPDATE user SET nickname = ? WHERE user_id = ?
         ''', (new_nickname, user_id))
+    db.commit()
     return jsonify({
         'success': True,
         'message': '修改昵称成功'
@@ -246,6 +273,7 @@ def set_username():
         db.execute('''
                 UPDATE user SET nickname = ? WHERE user_id = ?
             ''', (new_username, user_id))
+        db.commit()
     except db.IntegrityError:
         return jsonify({
             'success': True,
@@ -271,6 +299,7 @@ def set_grade():
     db.execute('''
         UPDATE user SET grade = ? WHERE user_id = ?
     ''', (grade, user_id))
+    db.commit()
     return jsonify({
         'success': True,
         'message': '修改年级成功'
@@ -290,6 +319,7 @@ def set_major():
     db.execute('''
         UPDATE user SET major = ? WHERE user_id = ?
     ''', (major, user_id))
+    db.commit()
     return jsonify({
         'success': True,
         'message': '修改专业成功'
@@ -303,7 +333,7 @@ CAPTCHA_FOLDER = os.path.join(os.getcwd(), 'backend/flaskr/captcha')
 def get_captcha():
     captcha_files = [f for f in os.listdir(CAPTCHA_FOLDER) if f.endswith('.png')]
     if not captcha_files:
-        return jsonify({'success': False, 'message': 'No captcha files available'}), 404
+        return jsonify({'success': False, 'message': 'No captcha files available'})
 
     selected_file = random.choice(captcha_files)
     captcha_url = url_for('static', filename=f'captcha/{selected_file}')

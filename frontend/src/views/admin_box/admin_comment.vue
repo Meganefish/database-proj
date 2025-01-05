@@ -1,5 +1,6 @@
 <template>
   <div class="admin-comment">
+    <strong>管理评论</strong>
     <el-table :data="paginatedData" style="width: 100%">
       <el-table-column prop="comment_id" label="comment_ID" width="120"></el-table-column>
       <el-table-column prop="body" label="评论内容" width="250">
@@ -65,6 +66,26 @@ export default {
       return this.comments.slice(start, end);  // 返回当前页的数据
     }
   },
+  setup(){
+    function Timetrans(gmtTime) {
+      const date = new Date(gmtTime);
+      const options = {
+        timeZone: "Asia/Shanghai",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      };
+      const formatter = new Intl.DateTimeFormat("zh-CN", options);
+      return formatter.format(date);
+    }
+    return {
+      Timetrans
+    };
+  },
   methods: {
     formatcommentBody(body) {
       if (body.length > 30) {
@@ -80,6 +101,9 @@ export default {
       try {
         const response = await axios.get('/admin/get_comments');  // 调用后端接口获取帖子数据
         this.comments = response.data;  // 假设接口返回的数据是帖子列表
+        this.comments.forEach(comment => {
+          comment.created_at = this.Timetrans(comment.created_at);  // 格式化时间
+        });
       } catch (error) {
         console.error('获取帖子数据失败', error);
       }

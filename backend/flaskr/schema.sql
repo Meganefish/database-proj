@@ -91,6 +91,7 @@ CREATE TABLE user_apply(
 CREATE TABLE take (
     user_id INTEGER,
     course_id INTEGER,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (course_id) REFERENCES Course(course_id),
     PRIMARY KEY (user_id, course_id)
@@ -226,6 +227,16 @@ BEGIN
     WHERE post_id = OLD.post_id;
 END;
 
+CREATE TRIGGER update_release_post_on_post_change
+AFTER UPDATE ON Post
+FOR EACH ROW
+BEGIN
+    UPDATE release_post
+    SET updated = CURRENT_TIMESTAMP
+    WHERE post_id = NEW.post_id
+      AND (OLD.title != NEW.title OR OLD.body != NEW.body);
+END;
+
 CREATE TRIGGER update_liked_comment_on_insert
 AFTER INSERT ON like_comment
 FOR EACH ROW
@@ -247,10 +258,11 @@ END;
 INSERT INTO User (user_id, username, password, nickname, grade, major, category) VALUES
 (0, 'admin', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', 'admin', 0, 'Not applicable', 'admin');
 
+INSERT INTO User (username, password, nickname, grade, major, category) VALUES
+('123', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '张三', 2021, '计算机科学与技术', 'moderator'),
+('lisi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '李四', 2022, '电子信息工程', 'moderator'),
+('wangwu', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '王五', 2023, '机械工程', 'moderator');
 INSERT INTO User (username, password, nickname, grade, major) VALUES
-('123', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '张三', 2021, '计算机科学与技术'),
-('lisi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '李四', 2022, '电子信息工程'),
-('wangwu', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '王五', 2023, '机械工程'),
 ('zhaoliu', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '赵六', 2024, '土木工程'),
 ('chenqi', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '陈七', 2021, '生物工程'),
 ('liubing', 'scrypt:32768:8:1$0zYnFttZwY4ZKWNC$5acd82a9b7995d5f82d324d246f3fd1d9cd345ecebcd510fbf703889497c4d1fa57e09f9cbc4541658911aabb4affd93d63aca246d06486ccb8a2541d617f361', '刘兵', 2023, '物理学'),
@@ -303,7 +315,13 @@ INSERT INTO Course (course_name, dept, teacher_name) VALUES
 
 
 INSERT INTO Post (title, body) VALUES
-('如何学习计算机网络', '本文将介绍如何高效学习计算机网络的相关知识。'),
+('如何学习计算机网络', '    本文将介绍如何高效学习计算机网络的相关知识。计算机网络作为计算机科学的重要组成部分，是理解信息传输、网络架构与应用服务的关键领域。要高效学习这一学科，需从理论与实践相结合的角度系统化推进。本文旨在探讨如何构建高效的学习路径，从而掌握计算机网络的核心概念与实际应用。
+首先，夯实理论基础是学习计算机网络的首要步骤。计算机网络的核心在于其层次化的架构模型，尤其是OSI模型和TCP/IP模型。这些模型将复杂的网络功能分解为不同的层级，每一层均承担特定的职责。学习时需对每一层的功能、协议及相关机制建立清晰的认知。例如，物理层的传输媒介与信号编码、数据链路层的帧结构与错误检测、网络层的路由协议与IP地址规划、传输层的可靠传输与拥塞控制以及应用层的HTTP、DNS等协议，都需要逐一深入理解。在此过程中，可参考权威教材如《计算机网络：自顶向下方法》或《计算机网络：一种自底向上的方法》，并结合实际问题进行验证。
+其次，实践操作是深化理解的重要途径。计算机网络不仅是理论的延展，更是工程实现的产物。因此，仅仅理解概念还远远不够，动手实践是必不可少的。通过搭建小型实验网络，利用工具如Wireshark进行数据包抓取分析，可以从数据流的微观视角观察协议的实际运行状态。此外，配置路由器与交换机，设计子网划分与路由规则，可以帮助巩固网络层的知识；使用Socket编程实现简单的客户端-服务器应用，可以加深对传输层和应用层协议的理解。这样，理论与实践相辅相成，知识体系将更加牢固。
+此外，关注前沿技术和实际应用是激发学习兴趣与保持动力的关键。计算机网络技术随着时代发展不断演进，从传统的有线网络到无线网络，从IPv4到IPv6，从集中式架构到分布式网络，再到如今热门的SDN（软件定义网络）与NFV（网络功能虚拟化）。了解这些新兴技术的基本概念与应用场景，不仅可以拓宽知识面，还能帮助理解传统网络技术的局限性与发展趋势。同时，结合实际案例分析，如互联网应用的架构设计、内容分发网络（CDN）的优化策略以及5G网络的技术原理等，可以更加直观地感受到计算机网络的实际价值。
+在学习过程中，适当使用辅助资源能够提升效率。在线课程、技术博客与论坛、开源项目以及学术论文等，均是拓展知识的宝贵来源。在线课程如Coursera上的“Computer Networking”课程、YouTube上的网络协议讲解视频，可以提供通俗易懂的解释；技术论坛如Stack Overflow、Reddit等，则可以帮助解决实践中遇到的问题。同时，通过参与开源项目或在线竞赛，不仅可以将理论知识应用于实际项目，还能锻炼团队协作能力与创新思维。
+最后，构建系统化的知识框架是深化学习成果的有效途径。学习中要注重总结与反思，将零散的知识点融入整体框架。通过绘制知识图谱，可以清晰地展现各层级协议的关系与作用；通过撰写学习笔记，可以强化记忆并巩固对知识的掌握；通过与他人交流探讨，可以从不同视角完善理解。此外，定期复盘学习进度与成果，查漏补缺，有助于构建完整的知识体系。
+综上所述，高效学习计算机网络需要从理论出发，结合实践探索，以前沿技术为动力，并辅以系统化总结。通过深刻理解网络架构、熟练掌握协议细节、不断实践与创新，最终形成完整的知识体系，为未来的学术研究与工程实践奠定坚实的基础。计算机网络不仅是知识的积累，更是对技术本质的思考与探索，其学习过程充满挑战与乐趣。'),
 ('数据库系统课程心得', '数据库系统是每个计算机专业学生必修的课程，以下是我的学习心得。'),
 ('操作系统基础知识', '本文简要介绍操作系统的基本概念和原理。'),
 ('数字电路设计的要点', '数字电路的设计在电子工程中非常重要，以下是我对其的理解。'),
@@ -336,6 +354,7 @@ INSERT INTO Post (title, body) VALUES
 ('操作系统的最新发展', '操作系统技术的更新换代不断推动计算机技术的发展。');
 
 
+
 INSERT INTO Comment (body) VALUES
 ('这篇文章写得很好，受益匪浅！'),
 ('我有一些不同的看法，能否进一步说明？'),
@@ -357,12 +376,12 @@ INSERT INTO Comment (body) VALUES
 ('医学课程的难度相对较大，希望大家可以多交流经验。'),
 ('会计学的实务操作非常重要，学习过程中不能忽视。'),
 ('广告学的实践案例可以多一些，帮助理解理论。'),
-('有机化学实验非常有趣，但实验操作有时会遇到一些困难。'),
-('我对于钢筋混凝土的设计有一些问题，大家可以一起讨论。'),
+('有一说一，今年的计网考试太难了'),
+('陆老师计网实验求组队，qq：123456789'),
 ('这篇文章的观点很有见地，提出了许多值得思考的观点。'),
 ('希望能有更多的电子商务案例分析，帮助理解市场操作。'),
 ('我觉得艺术设计的理论可以结合更多实际案例来讨论。'),
-('量子力学的实验部分我觉得理解比较难，希望有更多详细讲解。'),
+('出408考研书，五块钱一本，友园6号楼309取'),
 ('操作系统的内容比较难，尤其是内存管理部分。'),
 ('环境保护是我们每个人都应该关心的问题。'),
 ('在学习化学课程时，很多实验操作需要多次练习才能熟练掌握。'),
@@ -399,7 +418,7 @@ INSERT INTO Apply(name, description) VALUES
 ('体育竞技', '体育爱好者的交流平台');
 
 INSERT INTO user_apply(user_id, apply_id) VALUES
-(1, 1), (3,2);
+(1, 1), (3, 2), (1, 3), (4, 4), (6, 5);
 
 INSERT INTO take (user_id, course_id) VALUES
 (1, 1), (1, 2), (1, 3), (2, 4), (2, 5), (3, 6), (3, 7),
@@ -411,19 +430,17 @@ INSERT INTO take (user_id, course_id) VALUES
 INSERT INTO release_post (post_id, user_id) VALUES
 (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7),
 (8, 8), (9, 9), (10, 10), (11, 11), (12, 12), (13, 13), (14, 14),
-(15, 15), (16, 16), (17, 17), (18, 18), (19, 19), (20, 20),
+(15, 15), (16, 16), (17, 17), (18, 18), (19, 19), (20, 1),
 (21, 1), (22, 2), (23, 3), (24, 4), (25, 5), (26, 6), (27, 7),
-(28, 8), (29, 9), (30, 10), (31, 11), (32, 12), (33, 13), (34, 14),
-(35, 15), (36, 16), (37, 17), (38, 18), (39, 19), (40, 20);
+(28, 8), (29, 9), (30, 10), (31, 11);
 
 
 INSERT INTO release_comment (comment_id, user_id) VALUES
 (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7),
 (8, 8), (9, 9), (10, 10), (11, 11), (12, 12), (13, 13), (14, 14),
-(15, 15), (16, 16), (17, 17), (18, 18), (19, 19), (20, 20),
+(15, 15), (16, 16), (17, 17), (18, 18), (19, 19), (20, 1),
 (21, 1), (22, 2), (23, 3), (24, 4), (25, 5), (26, 6), (27, 7),
-(28, 8), (29, 9), (30, 10), (31, 11), (32, 12), (33, 13), (34, 14),
-(35, 15), (36, 16), (37, 17), (38, 18), (39, 19), (40, 20);
+(28, 8), (29, 9), (30, 10), (31, 11), (32, 12), (33, 13);
 
 
 INSERT INTO release_report (report_id, user_id) VALUES
@@ -436,17 +453,11 @@ INSERT INTO com_post (comment_id, post_id) VALUES
 (8, 8), (9, 9), (10, 10), (11, 11), (12, 12), (13, 13), (14, 14),
 (15, 15), (16, 16), (17, 17), (18, 18), (19, 19), (20, 20),
 (21, 1), (22, 1), (23, 3), (24, 3), (25, 5), (26, 1), (27, 8),
-(28, 8), (29, 9), (30, 10), (31, 10), (32, 12), (33, 14), (34, 14),
-(35, 15), (36, 13), (37, 1), (38, 2), (39, 11), (40, 20);
+(28, 8), (29, 9), (30, 10), (31, 10), (32, 12), (33, 14);
 
 INSERT INTO parent (comment_id, parent_comment_id) VALUES
-(21, 1), (22, 21), (37, 21), (24, 3), (34, 14), (40, 20);
+(22, 1), (26, 1);
 
-
-INSERT INTO parent (parent_comment_id, comment_id) VALUES
-(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8),
-(8, 9), (9, 10), (10, 11), (11, 12), (12, 13), (13, 14), (14, 15),
-(15, 16), (16, 17), (17, 18), (18, 19), (19, 20), (20, 21);
 
 
 INSERT INTO report_post (report_id, post_id) VALUES
@@ -461,14 +472,14 @@ INSERT INTO post_forum (post_id, forum_id)
 VALUES
 (1, 1), (2, 1), (3, 2), (4, 2), (5, 3),
 (6, 3), (7, 4), (8, 4), (9, 5), (10, 5),
-(11, 6), (12, 6), (13, 7), (14, 7), (15, 8),
-(16, 8), (17, 9), (18, 9), (19, 10), (20, 10),
-(21, 1), (22, 1), (23, 2), (24, 2), (25, 3),
-(26, 3), (27, 4), (28, 4), (29, 5), (30, 5);
+(11, 1), (12, 1), (13, 2), (14, 2), (15, 3),
+(16, 5), (17,1), (18, 1), (19, 5), (20, 5),
+(21, 5), (22, 5), (23, 5), (24, 5), (25, 7),
+(26, 1), (27, 2), (28, 3), (29, 7), (30, 4),(31,1);
 
 INSERT INTO manage_forum (user_id, forum_id) VALUES
 (1, 1), (1, 2), (1, 3), (2, 4),
-(3, 5), (3, 6), (3, 7), (6, 8);
+(3, 5);
 
 
 INSERT INTO like_comment(user_id, comment_id) VALUES

@@ -1,6 +1,6 @@
 <template>
   <div class="admin-post">
-    <strong>管理帖子</strong>
+    <strong>发帖记录</strong>
     <el-table :data="paginatedData" style="width: 100%">
       <el-table-column prop="post_id" label="post_ID" width="80"></el-table-column>
       <el-table-column prop="title" label="帖子标题" width="180"></el-table-column>
@@ -10,43 +10,36 @@
           <span>{{ formatPostBody(scope.row.body) }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="forum_name" label="所属论坛名称" width="120"></el-table-column>
-      <el-table-column prop="username" label="发布者" width="120"></el-table-column>
       <el-table-column prop="created" label="帖子创建时间" width="180"></el-table-column>
-      <!-- 操作列：删除按钮 -->
-      <el-table-column label="操作" width="150">
+      <el-table-column label="操作" width="90">
         <template #default="scope">
-          <el-button 
-            @click="deletePost(scope.row.post_id)" 
-            type="danger" 
-            size="small">
-            删除
+          <el-button @click="gotoPost(scope.row.post_id)" type="primary" size="small">
+             跳转
           </el-button>
         </template>
       </el-table-column>
+
+
     </el-table>
 
     <!-- 分页部分 -->
-    <el-pagination 
-      :page-size="pageSize" 
-      :current-page="currentPage" 
-      :total="posts.length"
-      layout="prev, pager, next, jumper" 
-      @current-change="handlePageChange">
+    <el-pagination :page-size="pageSize" :current-page="currentPage" :total="posts.length"
+      layout="prev, pager, next, jumper" @current-change="handlePageChange">
     </el-pagination>
   </div>
 </template>
 
 <script>
-import { ElTable, ElTableColumn, ElButton, ElPagination } from 'element-plus';
+import { ElTable, ElTableColumn, ElPagination } from 'element-plus';
 import axios from 'axios';
+import router from '@/router/Router.js'
+import { useRoute } from 'vue-router';
 
 export default {
   name: 'AdminPost',
   components: {
     ElTable,
     ElTableColumn,
-    ElButton,
     ElPagination
   },
   data() {
@@ -67,7 +60,10 @@ export default {
       return this.posts.slice(start, end);  // 返回当前页的数据
     }
   },
-  setup(){
+  setup() {
+    const gotoPost = (post_id) => {
+      router.push({ path: '/post', query: { id: post_id } });
+    }
     function Timetrans(gmtTime) {
       const date = new Date(gmtTime);
       const options = {
@@ -84,8 +80,9 @@ export default {
       return formatter.format(date);
     }
     return {
+      gotoPost,
       Timetrans
-    };
+    }
   },
   methods: {
     formatPostBody(body) {
@@ -99,9 +96,11 @@ export default {
     },
     // 获取帖子列表
     async fetchPosts() {
+      const route = useRoute();
+      const userId = route.params.user_id;
       try {
-        const response = await axios.get('/admin/get_posts');  // 调用后端接口获取帖子数据
-        this.posts = response.data;  // 假设接口返回的数据是帖子列表
+        const response = await axios.get(`/auth/profile${userId}`);  // 调用后端接口获取帖子数据
+        this.posts = response.data.posts;  // 假设接口返回的数据是帖子列表
         this.posts.forEach(post => {
           post.created = this.Timetrans(post.created);  // 格式化时间
         });
@@ -109,20 +108,6 @@ export default {
         console.error('获取帖子数据失败', error);
       }
     },
-    // 删除帖子
-    async deletePost(postId) {
-      try {
-        const response = await axios.post(`/safe_delete_post${postId}`);  // 调用后端接口删除帖子
-        if(response.data.success !== true) {
-          throw new Error(response.data.message||'删除帖子失败');
-        }
-        this.$message.success('删除成功');
-        this.fetchPosts();  // 删除成功后重新获取帖子数据
-      } catch (error) {
-        console.error('删除帖子失败', error);
-        this.$message.error('删除失败');
-      }
-    }
   }
 };
 </script>
