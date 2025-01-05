@@ -83,37 +83,22 @@
 import { reactive } from "vue";
 import axios from "axios";
 import { ElMessage } from "element-plus";
-// import { User, Lock } from "@element-plus/icons-vue";
 
 export default {
     name: "Register-Form",
-    // components: {
-    //   user: User,
-    //   lock: Lock,
-    // },
     setup() {
         const form = reactive({
             username: "",
             nickname: "",
             password: "",
             c_password: "",
-            // captcha: "",
         });
         const rules = {
             username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
             nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
             password: [{ required: true, message: "请输入密码", trigger: "blur" }],
             c_password: [{ required: true, message: "请确认密码", trigger: "blur" }],
-            // captcha: [{ required: true, message: "请输入验证码", trigger: "blur" }],
         };
-
-        // const loading = ref(false);
-        // const captchaSrc = ref("/api/captcha"); // 验证码图片地址
-
-        // const refreshCaptcha = () => {
-        //   captchaSrc.value = `/api/captcha?${new Date().getTime()}`;
-        // };
-
         const handleRegister = () => {
             if (form.password != form.c_password) { ElMessage.error("密码不一致！注册失败"); }
             else {
@@ -149,9 +134,6 @@ export default {
         return {
             form,
             rules,
-            // loading,
-            // captchaSrc,
-            // refreshCaptcha,
             handleLogin,
             handleRegister,
         };
@@ -190,11 +172,6 @@ export default {
     margin-left: 5px;
     font-weight: 500;
 }
-
-/* .captcha-img-container {
-    text-align: center;
-    cursor: pointer;
-  } */
 .logo {
     width: 50px;
     height: 50px;

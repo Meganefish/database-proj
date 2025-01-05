@@ -113,6 +113,7 @@ export default {
 
 <style scoped>
 .admin-post {
+  width: 75%;
   padding: 20px;
 }
 

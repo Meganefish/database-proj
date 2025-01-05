@@ -122,6 +122,7 @@ export default {
 
 <style scoped>
 .admin-forum {
+    width: 75%;
     padding: 20px;
 }
 

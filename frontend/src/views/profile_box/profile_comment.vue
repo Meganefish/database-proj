@@ -99,6 +99,7 @@ export default {
 
 <style scoped>
 .admin-comment {
+    width: 75%;
     padding: 20px;
 }
 
