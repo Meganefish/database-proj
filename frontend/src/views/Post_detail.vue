@@ -36,7 +36,7 @@
             <el-button :type="reportingTo_p ? 'info' : 'warning'" @click="showReportBox_p()">举报</el-button>
             <el-button v-if="yourid === post_info.user_id" type="success"
                 @click="editPost(post_info.post_id)">编辑</el-button>
-            <el-button v-if="yourid === post_info.user_id" type="danger" @click="deletePost">删除</el-button>
+            <el-button v-if="yourid === post_info.user_id || yourid === moderatorID" type="danger" @click="deletePost">删除</el-button>
         </div>
         <!--举报框-->
         <div v-if="reportingTo_p" class="reply_box">
@@ -79,7 +79,7 @@
                             @click="showReportBox_c(comment.comment_id)">举报</el-button>
                         <el-button :type="replyingTo === comment.comment_id ? 'info' : 'success'"
                             @click="showReplyBox(comment.comment_id)">回复</el-button>
-                        <el-button v-if="yourid === comment.user_id" type="danger"
+                        <el-button v-if="yourid === comment.user_id || yourid === moderatorID" type="danger"
                             @click="deleteComment(comment.comment_id)">删除</el-button>
                     </span>
                 </div>
@@ -126,6 +126,9 @@ export default {
         const replyContent = ref('');
         const reportContent_c = ref('');
         const reportContent_p = ref('');
+        const moderatorID = ref(null); 
+
+
         const yourid = ref(0); // 当前用户是否是作者
         // 获取帖子详情
         onMounted(async () => {
@@ -143,8 +146,20 @@ export default {
                 console.log(response.data);
                 post_info.value.created = Timetrans(post_info.value.created);
                 post_info.value.updated = Timetrans(post_info.value.updated);
+                const forumID = post_info.value.forum_id;
+                axios.get(`/forum${forumID}/get_moderator`)
+                    .then(response3 => {
+                        moderatorID.value = response3.data.user_id;
+                    })
+                    .catch(error => {
+                        console.error("获取版主信息失败：", error);
+                    });
+
                 const response2 = await axios.get("/get_logged_user");
                 yourid.value = response2.data.user_id;
+                console.log("yourid: ", yourid.value);
+                console.log("moderatorID: ", moderatorID.value);
+                console.log("post_info.user_id: ", post_info.value.user_id);
             } catch (error) {
                 console.error("获取数据失败：", error);
             }
@@ -219,7 +234,7 @@ export default {
         // 点赞评论
         const likeComment = async (commentId) => {
             try {
-                await axios.get("/comment" + commentId + "/click_like");
+                await axios.post("/comment" + commentId + "/click_like");
             } catch (error) {
                 console.error("获取数据失败：", error);
             }
@@ -318,6 +333,7 @@ export default {
             post_info,
             comment_info,
             newComment,
+            moderatorID,
             likePost,
             postComment,
             likeComment,
