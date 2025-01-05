@@ -635,3 +635,34 @@ def safe_delete_post(post_id):
         'success': True,
         'message': '安全删除帖子成功'
     })
+
+@bp.route('/forum<int:forum_id>/get_moderator', methods=['GET'])
+def get_moderator(forum_id):
+    db = get_db()
+    moderator = db.get('''
+        SELECT u.username, u.nickname, u.user_id
+        FROM User u
+        JOIN manage_forum mf ON mf.user_id = u.user_id
+        WHERE mf.forum_id = ? 
+    ''', (forum_id, )).fetchone()
+    moderator_dict = dict(moderator)
+    return jsonify(moderator_dict)
+
+
+@bp.route('/safe_delete_forum<int:forum_id>', methods=['POST'])
+def safe_delete_forum(forum_id):
+    db = get_db()
+    posts = db.execute('''
+        SELECT post_id
+        FROM post_forum WHERE forum_id = ?
+    ''', (forum_id, )).fetchall()
+    for post in posts:
+        safe_delete_post(post[0])
+    db.execute('''
+        DELETE FROM manage_forum WHERE forum_id = ?
+    ''', (forum_id, ))
+    db.commit()
+    return jsonify({
+        'success': True,
+        'message': '安全删除论坛成功'
+    })

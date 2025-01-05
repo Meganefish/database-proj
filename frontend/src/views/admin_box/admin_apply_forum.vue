@@ -3,7 +3,7 @@
     <strong>板块申请</strong>
     <el-table :data="paginatedData" style="width: 100%">
       <el-table-column prop="apply_id" label="apply_ID" width="80"></el-table-column>
-      <el-table-column prop="name" label="板块标题" width="180"></el-table-column>
+      <el-table-column prop="name" label="板块标题" width="150"></el-table-column>
       <el-table-column prop="description" label="板块描述" width="250">
         <template v-slot="scope">
           <span>{{ formatDescription(scope.row.description) }}</span>

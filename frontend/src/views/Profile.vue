@@ -17,6 +17,7 @@ import profileUser from './profile_box/profile_user.vue'
 import profilePost from './profile_box/profile_post.vue'
 import profileComment from './profile_box/profile_comment.vue'
 import profileCourse from './profile_box/profile_course.vue'
+import profileForum from './profile_box/profile_forum.vue'
 
 export default {
     name: 'UserProfile',
@@ -27,6 +28,7 @@ export default {
         profilePost,
         profileComment,
         profileCourse,
+        profileForum,
     },
     data() {
         return {
@@ -54,6 +56,9 @@ export default {
                 case '4':
                     this.currentComponent = 'profileComment';
                     break;
+                case '5':
+                    this.currentComponent = 'profileForum';
+                    break;
                 default:
                     this.currentComponent = 'profileUser';
             }
@@ -68,7 +73,8 @@ export default {
 .profile-container {
     display: flex;
     width: 70%;
-    margin: 0 auto; /* 居中对齐 */
+    margin: 0 auto;
+    /* 居中对齐 */
     flex-direction: column;
     height: 100vh;
 }

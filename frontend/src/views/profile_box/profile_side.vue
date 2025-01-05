@@ -7,6 +7,7 @@
       <el-menu-item index="2">参与课程</el-menu-item>
       <el-menu-item index="3">发帖记录</el-menu-item>
       <el-menu-item index="4">评论记录</el-menu-item>
+      <el-menu-item index="5">管理论坛</el-menu-item>
     </el-menu>
   </div>
 </template>
@@ -46,6 +47,8 @@ export default {
           return '3';
         case 'profileComment':
           return '4';
+        case 'profileForum':
+          return '5';
         default:
           return '1';
       }

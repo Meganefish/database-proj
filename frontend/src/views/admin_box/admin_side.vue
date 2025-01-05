@@ -20,6 +20,7 @@
         <el-menu-item index="5-1">帖子举报</el-menu-item>
         <el-menu-item index="5-2">评论举报</el-menu-item>
       </el-submenu>
+      <el-menu-item index="6">管理板块</el-menu-item>
     </el-menu>
   </div>
 </template>
@@ -55,6 +56,8 @@ export default {
           return '5-1';
         case 'AdminReportComment':
           return '5-2';
+        case 'AdminForum':
+          return '6';
         default:
           return '1';  // 默认是管理用户
       }
